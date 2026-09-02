@@ -56,7 +56,7 @@ const $=id=>document.getElementById(id); const nf=new Intl.NumberFormat('en-US',
 const money=v=>((v||0)/1e6).toFixed(2)+' MB'; const pct=v=>((v||0)*100).toFixed(1)+'%'; const num=v=>nf.format(Math.round(v||0));
 const clean=v=>String(v??'').trim(); const uniq=a=>[...new Set(a.map(clean).filter(Boolean))];
 function fill(id,vals,all='All'){const e=$(id),cur=e.value;e.innerHTML='<option value="">'+all+'</option>'+uniq(vals).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).map(v=>'<option>'+v.replaceAll('&','&amp;').replaceAll('<','&lt;')+'</option>').join('');if([...e.options].some(o=>o.value===cur))e.value=cur;}
-function base(){return DATA.filter(r=>r.AREA==='BMA I (North West)')}
+function base(){return DATA}
 function filtered(ignore=[]){return base().filter(r=>{for(const id of ['year','month','product','brand','model','channel']){if(ignore.includes(id))continue;const v=$(id).value;if(v && clean(r[id==='year'?'YEAR':id==='month'?'MONTH':id.toUpperCase()])!==v)return false}return true})}
 function agg(rows){return rows.reduce((a,r)=>(a.q+=r.QTY,a.a+=r.NET_AMOUNT,a),{q:0,a:0})}
 function monthRows(rows,month){return rows.filter(r=>+r.MONTH===+month)}
