@@ -1,5 +1,4 @@
 const DATA = window.SALES_DATA || [];
-
 const $ = id => document.getElementById(id);
 
 const nf = new Intl.NumberFormat("en-US", {
@@ -30,11 +29,9 @@ const filters = {
 };
 
 function uniq(arr) {
-  return [
-    ...new Set(
-      arr.filter(x => x !== "" && x !== null && x !== undefined)
-    )
-  ];
+  return [...new Set(
+    arr.filter(x => x !== "" && x !== null && x !== undefined)
+  )];
 }
 
 function setOptions(id, vals, allLabel) {
@@ -45,16 +42,9 @@ function setOptions(id, vals, allLabel) {
     `<option value="">${allLabel}</option>` +
     uniq(vals)
       .sort((a, b) =>
-        String(a).localeCompare(
-          String(b),
-          undefined,
-          { numeric: true }
-        )
+        String(a).localeCompare(String(b), undefined, { numeric: true })
       )
-      .map(
-        v =>
-          `<option value="${esc(v)}">${esc(v)}</option>`
-      )
+      .map(v => `<option value="${esc(v)}">${esc(v)}</option>`)
       .join("");
 
   if ([...el.options].some(o => o.value === current)) {
@@ -80,12 +70,7 @@ function aggregate(rows) {
       a.a += +r.NET_AMOUNT || 0;
       return a;
     },
-    {
-      tq: 0,
-      ta: 0,
-      q: 0,
-      a: 0
-    }
+    { tq: 0, ta: 0, q: 0, a: 0 }
   );
 }
 
@@ -109,274 +94,114 @@ function cls(ach) {
     : "critical";
 }
 
-/* =========================================================
-   FILTER LOGIC
-   ========================================================= */
+/* ===========================
+   FILTER
+=========================== */
 
 function refreshDependent() {
-
   const selected = {};
-
-  Object.keys(filters).forEach(id => {
-    selected[id] = $(id).value;
-  });
+  Object.keys(filters).forEach(id => selected[id] = $(id).value);
 
   let rows = DATA;
 
-  /* Year */
   if (selected.fYear) {
-    rows = rows.filter(
-      r => String(r.YEAR) === selected.fYear
-    );
+    rows = rows.filter(r => String(r.YEAR) === selected.fYear);
   }
+  setOptions("fMonth", rows.map(r => r.MONTH), "All Months");
 
-  setOptions(
-    "fMonth",
-    rows.map(r => r.MONTH),
-    "All Months"
-  );
-
-  /* Year + Month */
   rows = DATA;
-
   if (selected.fYear) {
-    rows = rows.filter(
-      r => String(r.YEAR) === selected.fYear
-    );
+    rows = rows.filter(r => String(r.YEAR) === selected.fYear);
   }
-
   if (selected.fMonth) {
-    rows = rows.filter(
-      r => String(r.MONTH) === selected.fMonth
-    );
+    rows = rows.filter(r => String(r.MONTH) === selected.fMonth);
   }
+  setOptions("fRegion", rows.map(r => r.AREA_GROUP), "All Regions");
 
-  setOptions(
-    "fRegion",
-    rows.map(r => r.AREA_GROUP),
-    "All Regions"
-  );
-
-  /* Year + Month + Region */
   rows = DATA;
-
   if (selected.fYear) {
-    rows = rows.filter(
-      r => String(r.YEAR) === selected.fYear
-    );
+    rows = rows.filter(r => String(r.YEAR) === selected.fYear);
   }
-
   if (selected.fMonth) {
-    rows = rows.filter(
-      r => String(r.MONTH) === selected.fMonth
-    );
+    rows = rows.filter(r => String(r.MONTH) === selected.fMonth);
   }
-
   if (selected.fRegion) {
-    rows = rows.filter(
-      r => String(r.AREA_GROUP) === selected.fRegion
-    );
+    rows = rows.filter(r => String(r.AREA_GROUP) === selected.fRegion);
   }
+  setOptions("fArea", rows.map(r => r.AREA), "All Areas");
 
-  setOptions(
-    "fArea",
-    rows.map(r => r.AREA),
-    "All Areas"
-  );
-
-  /* + Area */
   rows = DATA;
-
   if (selected.fYear) {
-    rows = rows.filter(
-      r => String(r.YEAR) === selected.fYear
-    );
+    rows = rows.filter(r => String(r.YEAR) === selected.fYear);
   }
-
   if (selected.fMonth) {
-    rows = rows.filter(
-      r => String(r.MONTH) === selected.fMonth
-    );
+    rows = rows.filter(r => String(r.MONTH) === selected.fMonth);
   }
-
   if (selected.fRegion) {
-    rows = rows.filter(
-      r => String(r.AREA_GROUP) === selected.fRegion
-    );
+    rows = rows.filter(r => String(r.AREA_GROUP) === selected.fRegion);
   }
-
   if (selected.fArea) {
-    rows = rows.filter(
-      r => String(r.AREA) === selected.fArea
-    );
+    rows = rows.filter(r => String(r.AREA) === selected.fArea);
   }
+  setOptions("fChannel", rows.map(r => r.CHANNEL), "All Channels");
 
-  setOptions(
-    "fChannel",
-    rows.map(r => r.CHANNEL),
-    "All Channels"
-  );
-
-  /* + Channel */
   rows = DATA;
-
   if (selected.fYear) {
-    rows = rows.filter(
-      r => String(r.YEAR) === selected.fYear
-    );
+    rows = rows.filter(r => String(r.YEAR) === selected.fYear);
   }
-
   if (selected.fMonth) {
-    rows = rows.filter(
-      r => String(r.MONTH) === selected.fMonth
-    );
+    rows = rows.filter(r => String(r.MONTH) === selected.fMonth);
   }
-
   if (selected.fRegion) {
-    rows = rows.filter(
-      r => String(r.AREA_GROUP) === selected.fRegion
-    );
+    rows = rows.filter(r => String(r.AREA_GROUP) === selected.fRegion);
   }
-
   if (selected.fArea) {
-    rows = rows.filter(
-      r => String(r.AREA) === selected.fArea
-    );
+    rows = rows.filter(r => String(r.AREA) === selected.fArea);
   }
-
   if (selected.fChannel) {
-    rows = rows.filter(
-      r => String(r.CHANNEL) === selected.fChannel
-    );
+    rows = rows.filter(r => String(r.CHANNEL) === selected.fChannel);
   }
+  setOptions("fProduct", rows.map(r => r.PRODUCT), "All Products");
 
-  setOptions(
-    "fProduct",
-    rows.map(r => r.PRODUCT),
-    "All Products"
-  );
-
-  /* + Product */
   rows = DATA;
-
   if (selected.fYear) {
-    rows = rows.filter(
-      r => String(r.YEAR) === selected.fYear
-    );
+    rows = rows.filter(r => String(r.YEAR) === selected.fYear);
   }
-
   if (selected.fMonth) {
-    rows = rows.filter(
-      r => String(r.MONTH) === selected.fMonth
-    );
+    rows = rows.filter(r => String(r.MONTH) === selected.fMonth);
   }
-
   if (selected.fRegion) {
-    rows = rows.filter(
-      r => String(r.AREA_GROUP) === selected.fRegion
-    );
+    rows = rows.filter(r => String(r.AREA_GROUP) === selected.fRegion);
   }
-
   if (selected.fArea) {
-    rows = rows.filter(
-      r => String(r.AREA) === selected.fArea
-    );
+    rows = rows.filter(r => String(r.AREA) === selected.fArea);
   }
-
   if (selected.fChannel) {
-    rows = rows.filter(
-      r => String(r.CHANNEL) === selected.fChannel
-    );
+    rows = rows.filter(r => String(r.CHANNEL) === selected.fChannel);
   }
-
   if (selected.fProduct) {
-    rows = rows.filter(
-      r => String(r.PRODUCT) === selected.fProduct
-    );
+    rows = rows.filter(r => String(r.PRODUCT) === selected.fProduct);
   }
+  setOptions("fShop", rows.map(r => r.SHOP_NAME), "All Shops");
 
-  setOptions(
-    "fShop",
-    rows.map(r => r.SHOP_NAME),
-    "All Shops"
-  );
-
-  /* Restore selections */
   Object.keys(filters).forEach(id => {
-
-    if (
-      [...$(id).options].some(
-        o => o.value === selected[id]
-      )
-    ) {
+    if ([...$(id).options].some(o => o.value === selected[id])) {
       $(id).value = selected[id];
     }
-
   });
 }
 
-
-/* =========================================================
-   INITIAL SETUP
-   ========================================================= */
-
 function populate() {
-
-  setOptions(
-    "fYear",
-    DATA.map(r => r.YEAR),
-    "All Years"
-  );
-
-  setOptions(
-    "fMonth",
-    DATA.map(r => r.MONTH),
-    "All Months"
-  );
-
-  setOptions(
-    "fRegion",
-    DATA.map(r => r.AREA_GROUP),
-    "All Regions"
-  );
-
-  setOptions(
-    "fArea",
-    DATA.map(r => r.AREA),
-    "All Areas"
-  );
-
-  setOptions(
-    "fChannel",
-    DATA.map(r => r.CHANNEL),
-    "All Channels"
-  );
-
-  setOptions(
-    "fProduct",
-    DATA.map(r => r.PRODUCT),
-    "All Products"
-  );
-
-  setOptions(
-    "fShop",
-    DATA.map(r => r.SHOP_NAME),
-    "All Shops"
-  );
-
-  /*
-    DEFAULT VIEW
-
-    Company Overview
-    2026
-    August
-    All Regions
-    All Areas
-  */
+  setOptions("fYear", DATA.map(r => r.YEAR), "All Years");
+  setOptions("fMonth", DATA.map(r => r.MONTH), "All Months");
+  setOptions("fRegion", DATA.map(r => r.AREA_GROUP), "All Regions");
+  setOptions("fArea", DATA.map(r => r.AREA), "All Areas");
+  setOptions("fChannel", DATA.map(r => r.CHANNEL), "All Channels");
+  setOptions("fProduct", DATA.map(r => r.PRODUCT), "All Products");
+  setOptions("fShop", DATA.map(r => r.SHOP_NAME), "All Shops");
 
   $("fYear").value = "2026";
   $("fMonth").value = "8";
-
   $("fRegion").value = "";
   $("fArea").value = "";
   $("fChannel").value = "";
@@ -386,66 +211,38 @@ function populate() {
   refreshDependent();
 }
 
-
-/* =========================================================
+/* ===========================
    KPI
-   ========================================================= */
+=========================== */
 
 function updateKPIs(rows) {
-
   const x = aggregate(rows);
 
-  const amountAch =
-    x.ta ? x.a / x.ta : 0;
+  const netAmountAch = x.ta ? x.a / x.ta : 0;
+  const qtyAch = x.tq ? x.q / x.tq : 0;
+  const asp = x.q ? x.a / x.q : 0;
 
-  const volumeAch =
-    x.tq ? x.q / x.tq : 0;
-
-  const asp =
-    x.q ? x.a / x.q : 0;
-
-  $("kAmount").textContent =
-    money(x.a);
-
-  $("kAmountTarget").textContent =
-    money(x.ta);
-
-  $("kAmountAch").textContent =
-    pct(amountAch);
-
+  $("kAmount").textContent = money(x.a);
+  $("kAmountTarget").textContent = money(x.ta);
+  $("kAmountAch").textContent = pct(netAmountAch);
   $("kAmountGap").textContent =
-    (x.a - x.ta >= 0 ? "+" : "") +
-    money(x.a - x.ta);
+    (x.a - x.ta >= 0 ? "+" : "") + money(x.a - x.ta);
 
-  $("kQty").textContent =
-    num(x.q);
-
-  $("kQtyTarget").textContent =
-    num(x.tq);
-
-  $("kQtyAch").textContent =
-    pct(volumeAch);
-
+  $("kQty").textContent = num(x.q);
+  $("kQtyTarget").textContent = num(x.tq);
+  $("kQtyAch").textContent = pct(qtyAch);
   $("kQtyGap").textContent =
-    (x.q - x.tq >= 0 ? "+" : "") +
-    num(x.q - x.tq);
+    (x.q - x.tq >= 0 ? "+" : "") + num(x.q - x.tq);
 
-  $("kAsp").textContent =
-    x.q ? nf.format(asp) : "-";
+  $("kAsp").textContent = x.q ? nf.format(asp) : "-";
 
-  $("kStatus").textContent =
-    status(amountAch);
-
-  $("kStatus").className =
-    cls(amountAch);
+  $("kStatus").textContent = status(netAmountAch);
+  $("kStatus").className = cls(netAmountAch);
 
   $("kStatusNote").textContent =
-    amountAch >= 1
-      ? "Amount target achieved"
-      : `Gap ${pct(Math.abs(1 - amountAch))} to target`;
-
-
-  /* Subtitle */
+    netAmountAch >= 1
+      ? "Net Amount target achieved"
+      : `Net Amount gap ${pct(Math.abs(1 - netAmountAch))} to target`;
 
   const scope = [];
 
@@ -460,91 +257,62 @@ function updateKPIs(rows) {
   ];
 
   names.forEach(([id, label]) => {
-
     if ($(id).value) {
-      scope.push(
-        `${label}: ${$(id).value}`
-      );
+      scope.push(`${label}: ${$(id).value}`);
     }
-
   });
 
   $("subtitle").textContent =
-    (scope.length
-      ? scope.join(" • ")
-      : "Company Overview") +
-    " • Net Amount + Volume Performance";
+    (scope.length ? scope.join(" • ") : "Company Overview") +
+    " • Net Amount + QTY Performance";
 
-
-  /* Executive Insight */
-
-  const volumeMsg =
-    volumeAch < 1
-      ? `Volume is below target by ${num(
-          Math.abs(x.q - x.tq)
-        )} (${pct(volumeAch)} achievement).`
-      : `Volume is at ${pct(
-          volumeAch
-        )} of target.`;
-
-  const amountMsg =
-    amountAch >= 1
-      ? `Net Amount achieved ${pct(
-          amountAch
-        )} of target, with ${money(
+  const netAmountMsg =
+    netAmountAch >= 1
+      ? `Net Amount achieved ${pct(netAmountAch)} of target, with ${money(
           x.a - x.ta
         )} above target.`
-      : `Net Amount is ${pct(
-          amountAch
-        )} of target, with a gap of ${money(
+      : `Net Amount is ${pct(netAmountAch)} of target, with a gap of ${money(
           Math.abs(x.a - x.ta)
         )}.`;
 
+  const qtyMsg =
+    qtyAch < 1
+      ? `QTY is below target by ${num(
+          Math.abs(x.q - x.tq)
+        )} (${pct(qtyAch)} achievement).`
+      : `QTY achieved ${pct(qtyAch)} of target.`;
+
   const driver =
-    volumeAch < amountAch
+    qtyAch < netAmountAch
       ? `ASP is ${nf.format(
           asp
         )} per unit, indicating value per unit is supporting the Net Amount result.`
-      : `Volume is the stronger driver of Net Amount performance.`;
+      : `QTY is the stronger driver of Net Amount performance.`;
 
   $("insightText").textContent =
-    `${amountMsg} ${volumeMsg} ${driver}`;
-
-
-  /* Action */
+    `${netAmountMsg} ${qtyMsg} ${driver}`;
 
   $("keyMessage").textContent =
-    `Amount status: ${status(
-      amountAch
-    )} (${pct(
-      amountAch
-    )}). Volume status: ${status(
-      volumeAch
-    )} (${pct(
-      volumeAch
-    )}).`;
+    `Net Amount status: ${status(netAmountAch)} (${pct(
+      netAmountAch
+    )}). QTY status: ${status(qtyAch)} (${pct(qtyAch)}).`;
 
   $("actionMessage").textContent =
-    volumeAch < amountAch
-      ? `Focus on volume recovery while protecting ASP; prioritize products and shops with the largest Volume and Net Amount gaps.`
-      : `Focus on sustaining volume while improving value per unit and product mix.`;
+    qtyAch < netAmountAch
+      ? "Focus on QTY recovery while protecting ASP; prioritize products and shops with the largest QTY and Net Amount gaps."
+      : "Focus on sustaining QTY while improving ASP and product mix.";
 }
 
-
-/* =========================================================
-   MONTHLY DATA
-   ========================================================= */
+/* ===========================
+   MONTHLY TREND
+=========================== */
 
 function monthly(rows) {
-
   const by = {};
 
   rows.forEach(r => {
-
     const key =
-      `${r.YEAR}-${String(
-        r.MONTH
-      ).padStart(2, "0")}`;
+      `${r.YEAR}-${String(r.MONTH).padStart(2, "0")}`;
 
     if (!by[key]) {
       by[key] = {
@@ -555,18 +323,10 @@ function monthly(rows) {
       };
     }
 
-    by[key].a +=
-      +r.NET_AMOUNT || 0;
-
-    by[key].t +=
-      +r.TARGET_BOTTOMUP_NET_AMOUNT || 0;
-
-    by[key].q +=
-      +r.QTY || 0;
-
-    by[key].tq +=
-      +r.TARGET_BOTTOMUP_QTY || 0;
-
+    by[key].a += +r.NET_AMOUNT || 0;
+    by[key].t += +r.TARGET_BOTTOMUP_NET_AMOUNT || 0;
+    by[key].q += +r.QTY || 0;
+    by[key].tq += +r.TARGET_BOTTOMUP_QTY || 0;
   });
 
   return Object.entries(by)
@@ -577,35 +337,10 @@ function monthly(rows) {
     }));
 }
 
-
-/* =========================================================
-   TREND
-   ========================================================= */
-
-function renderTrend(rows) {
-
-  const selectedMonth =
-    $("fMonth").value;
-
-  /*
-    IMPORTANT:
-
-    KPI = selected month
-
-    Trend =
-    Jan -> selected month
-
-    while keeping:
-    Year
-    Region
-    Area
-    Channel
-    Product
-    Shop
-  */
+function renderTrend() {
+  const selectedMonth = $("fMonth").value;
 
   let trendRows = DATA.filter(r => {
-
     const checks = [
       ["fYear", r.YEAR],
       ["fRegion", r.AREA_GROUP],
@@ -620,16 +355,17 @@ function renderTrend(rows) {
         !$(id).value ||
         String(val) === $(id).value
     );
-
   });
 
-  if (!$("fYear").value) {
-    trendRows = DATA.slice();
+  if (selectedMonth) {
+    trendRows = trendRows.filter(
+      r => Number(r.MONTH) <= Number(selectedMonth)
+    );
   }
 
   const d = monthly(trendRows);
 
-  const max = Math.max(
+  const maxAmount = Math.max(
     ...d.map(x => x.a),
     ...d.map(x => x.t),
     1
@@ -637,37 +373,24 @@ function renderTrend(rows) {
 
   $("trendChart").innerHTML =
     `<div class="bars">` +
-    d
-      .map(
-        x =>
-          `<div class="chartcol">
-            <div class="barwrap">
-              <div
-                class="bar actual"
-                style="height:${x.a / max * 100}%">
-              </div>
-              <div
-                class="bar target"
-                style="height:${x.t / max * 100}%">
-              </div>
-            </div>
-            <div class="barlabel">${x.k}</div>
-          </div>`
-      )
-      .join("") +
+    d.map(x =>
+      `<div class="chartcol">
+        <div class="barwrap">
+          <div class="bar actual"
+               style="height:${x.a / maxAmount * 100}%"></div>
+          <div class="bar target"
+               style="height:${x.t / maxAmount * 100}%"></div>
+        </div>
+        <div class="barlabel">${x.k}</div>
+      </div>`
+    ).join("") +
     `</div>
      <div class="legend">
-       Actual ■ &nbsp;
-       Target ■
-       ${
-         selectedMonth
-           ? `• Selected month: ${selectedMonth}`
-           : ""
-       }
+       Actual Net Amount ■ &nbsp;
+       Target Net Amount ■
      </div>`;
 
-
-  const maxq = Math.max(
+  const maxQty = Math.max(
     ...d.map(x => x.q),
     ...d.map(x => x.tq),
     1
@@ -675,83 +398,53 @@ function renderTrend(rows) {
 
   $("volumeChart").innerHTML =
     `<div class="bars">` +
-    d
-      .map(
-        x =>
-          `<div class="chartcol">
-            <div class="barwrap">
-              <div
-                class="bar qty"
-                style="height:${x.q / maxq * 100}%">
-              </div>
-              <div
-                class="bar target"
-                style="height:${x.tq / maxq * 100}%">
-              </div>
-            </div>
-            <div class="barlabel">${x.k}</div>
-          </div>`
-      )
-      .join("") +
+    d.map(x =>
+      `<div class="chartcol">
+        <div class="barwrap">
+          <div class="bar qty"
+               style="height:${x.q / maxQty * 100}%"></div>
+          <div class="bar target"
+               style="height:${x.tq / maxQty * 100}%"></div>
+        </div>
+        <div class="barlabel">${x.k}</div>
+      </div>`
+    ).join("") +
     `</div>
      <div class="legend">
-       Actual Volume ■ &nbsp;
-       Target Volume ■
-       ${
-         selectedMonth
-           ? `• Selected month: ${selectedMonth}`
-           : ""
-       }
+       Actual QTY ■ &nbsp;
+       Target QTY ■
      </div>`;
 }
 
-
-/* =========================================================
+/* ===========================
    PRODUCT
-   ========================================================= */
+=========================== */
 
 function renderProduct(rows) {
-
   const by = {};
 
   rows.forEach(r => {
-
     const k = r.PRODUCT;
 
     if (!by[k]) {
-      by[k] = {
-        a: 0,
-        t: 0,
-        q: 0,
-        tq: 0
-      };
+      by[k] = { a: 0, t: 0, q: 0, tq: 0 };
     }
 
-    by[k].a +=
-      +r.NET_AMOUNT || 0;
-
-    by[k].t +=
-      +r.TARGET_BOTTOMUP_NET_AMOUNT || 0;
-
-    by[k].q +=
-      +r.QTY || 0;
-
-    by[k].tq +=
-      +r.TARGET_BOTTOMUP_QTY || 0;
-
+    by[k].a += +r.NET_AMOUNT || 0;
+    by[k].t += +r.TARGET_BOTTOMUP_NET_AMOUNT || 0;
+    by[k].q += +r.QTY || 0;
+    by[k].tq += +r.TARGET_BOTTOMUP_QTY || 0;
   });
 
-  const arr =
-    Object.entries(by)
-      .map(([k, v]) => ({
-        k,
-        ...v,
-        aa: v.t ? v.a / v.t : 0,
-        qa: v.tq ? v.q / v.tq : 0,
-        asp: v.q ? v.a / v.q : 0
-      }))
-      .sort((a, b) => b.a - a.a);
-
+  const arr = Object.entries(by)
+    .map(([k, v]) => ({
+      k,
+      ...v,
+      aa: v.t ? v.a / v.t : 0,
+      qa: v.tq ? v.q / v.tq : 0,
+      asp: v.q ? v.a / v.q : 0
+    }))
+    .sort((a, b) => b.a - a.a);
 
   $("productTable").innerHTML =
     `<div class="tablewrap">
@@ -760,83 +453,56 @@ function renderProduct(rows) {
           <tr>
             <th>Product</th>
             <th>Net Amount</th>
-            <th>Amt Ach.</th>
-            <th>Volume</th>
-            <th>Vol Ach.</th>
+            <th>Net Amt Ach.</th>
+            <th>QTY</th>
+            <th>QTY Ach.</th>
             <th>ASP</th>
           </tr>
         </thead>
         <tbody>
-          ${
-            arr
-              .map(
-                x =>
-                  `<tr>
-                    <td>${esc(x.k)}</td>
-                    <td>${money(x.a)}</td>
-                    <td class="${cls(x.aa)}">
-                      ${pct(x.aa)}
-                    </td>
-                    <td>${num(x.q)}</td>
-                    <td class="${cls(x.qa)}">
-                      ${pct(x.qa)}
-                    </td>
-                    <td>${nf.format(x.asp)}</td>
-                  </tr>`
-              )
-              .join("")
-          }
+          ${arr.map(x =>
+            `<tr>
+              <td>${esc(x.k)}</td>
+              <td>${money(x.a)}</td>
+              <td class="${cls(x.aa)}">${pct(x.aa)}</td>
+              <td>${num(x.q)}</td>
+              <td class="${cls(x.qa)}">${pct(x.qa)}</td>
+              <td>${nf.format(x.asp)}</td>
+            </tr>`
+          ).join("")}
         </tbody>
       </table>
     </div>`;
 }
 
-
-/* =========================================================
+/* ===========================
    AREA
-   ========================================================= */
+=========================== */
 
 function renderArea(rows) {
-
   const by = {};
 
   rows.forEach(r => {
-
     const k = r.AREA;
 
     if (!by[k]) {
-      by[k] = {
-        a: 0,
-        t: 0,
-        q: 0,
-        tq: 0
-      };
+      by[k] = { a: 0, t: 0, q: 0, tq: 0 };
     }
 
-    by[k].a +=
-      +r.NET_AMOUNT || 0;
-
-    by[k].t +=
-      +r.TARGET_BOTTOMUP_NET_AMOUNT || 0;
-
-    by[k].q +=
-      +r.QTY || 0;
-
-    by[k].tq +=
-      +r.TARGET_BOTTOMUP_QTY || 0;
-
+    by[k].a += +r.NET_AMOUNT || 0;
+    by[k].t += +r.TARGET_BOTTOMUP_NET_AMOUNT || 0;
+    by[k].q += +r.QTY || 0;
+    by[k].tq += +r.TARGET_BOTTOMUP_QTY || 0;
   });
 
-  const arr =
-    Object.entries(by)
-      .map(([k, v]) => ({
-        k,
-        ...v,
-        aa: v.t ? v.a / v.t : 0,
-        qa: v.tq ? v.q / v.tq : 0
-      }))
-      .sort((a, b) => b.aa - a.aa);
-
+  const arr = Object.entries(by)
+    .map(([k, v]) => ({
+      k,
+      ...v,
+      aa: v.t ? v.a / v.t : 0,
+      qa: v.tq ? v.q / v.tq : 0
+    }))
+    .sort((a, b) => b.aa - a.aa);
 
   $("areaTable").innerHTML =
     `<div class="tablewrap">
@@ -845,106 +511,70 @@ function renderArea(rows) {
           <tr>
             <th>Area</th>
             <th>Net Amount</th>
-            <th>Amt Ach.</th>
-            <th>Volume</th>
-            <th>Vol Ach.</th>
-            <th>Gap</th>
+            <th>Net Amt Ach.</th>
+            <th>QTY</th>
+            <th>QTY Ach.</th>
+            <th>Net Amount Gap</th>
           </tr>
         </thead>
         <tbody>
-          ${
-            arr
-              .map(
-                x =>
-                  `<tr>
-                    <td>${esc(x.k)}</td>
-                    <td>${money(x.a)}</td>
-                    <td class="${cls(x.aa)}">
-                      ${pct(x.aa)}
-                    </td>
-                    <td>${num(x.q)}</td>
-                    <td class="${cls(x.qa)}">
-                      ${pct(x.qa)}
-                    </td>
-                    <td>
-                      ${
-                        x.a - x.t >= 0
-                          ? "+"
-                          : ""
-                      }${money(x.a - x.t)}
-                    </td>
-                  </tr>`
-              )
-              .join("")
-          }
+          ${arr.map(x =>
+            `<tr>
+              <td>${esc(x.k)}</td>
+              <td>${money(x.a)}</td>
+              <td class="${cls(x.aa)}">${pct(x.aa)}</td>
+              <td>${num(x.q)}</td>
+              <td class="${cls(x.qa)}">${pct(x.qa)}</td>
+              <td>${x.a - x.t >= 0 ? "+" : ""}${money(x.a - x.t)}</td>
+            </tr>`
+          ).join("")}
         </tbody>
       </table>
     </div>`;
 }
 
-
-/* =========================================================
+/* ===========================
    SHOP
-   ========================================================= */
+=========================== */
 
 function renderShops(rows) {
-
   const by = {};
 
   rows.forEach(r => {
-
     const k = r.SHOP_NAME;
 
     if (!by[k]) {
-      by[k] = {
-        a: 0,
-        t: 0,
-        q: 0,
-        tq: 0
-      };
+      by[k] = { a: 0, t: 0, q: 0, tq: 0 };
     }
 
-    by[k].a +=
-      +r.NET_AMOUNT || 0;
-
-    by[k].t +=
-      +r.TARGET_BOTTOMUP_NET_AMOUNT || 0;
-
-    by[k].q +=
-      +r.QTY || 0;
-
-    by[k].tq +=
-      +r.TARGET_BOTTOMUP_QTY || 0;
-
+    by[k].a += +r.NET_AMOUNT || 0;
+    by[k].t += +r.TARGET_BOTTOMUP_NET_AMOUNT || 0;
+    by[k].q += +r.QTY || 0;
+    by[k].tq += +r.TARGET_BOTTOMUP_QTY || 0;
   });
 
-  const arr =
-    Object.entries(by)
-      .map(([k, v]) => ({
-        k,
-        ...v,
-        aa: v.t ? v.a / v.t : 0,
-        qa: v.tq ? v.q / v.tq : 0,
-        asp: v.q ? v.a / v.q : 0
-      }))
-      .filter(x => x.a || x.t)
-      .sort(
-        (a, b) =>
-          (b.a - b.t) -
-          (a.a - a.t)
-      );
-
+  const arr = Object.entries(by)
+    .map(([k, v]) => ({
+      k,
+      ...v,
+      aa: v.t ? v.a / v.t : 0,
+      qa: v.tq ? v.q / v.tq : 0,
+      asp: v.q ? v.a / v.q : 0
+    }))
+    .filter(x => x.a || x.t)
+    .sort(
+      (a, b) =>
+        (b.a - b.t) -
+        (a.a - a.t)
+    );
 
   const show = [
     ...arr.slice(0, 10),
     ...arr.slice(-10)
   ].filter(
     (x, i, a) =>
-      a.findIndex(
-        y => y.k === x.k
-      ) === i
+      a.findIndex(y => y.k === x.k) === i
   );
-
 
   $("shopTable").innerHTML =
     `<div class="tablewrap">
@@ -953,114 +583,68 @@ function renderShops(rows) {
           <tr>
             <th>Shop</th>
             <th>Net Amount</th>
-            <th>Amt Ach.</th>
-            <th>Gap</th>
-            <th>Volume</th>
-            <th>Vol Ach.</th>
+            <th>Net Amt Ach.</th>
+            <th>Net Amount Gap</th>
+            <th>QTY</th>
+            <th>QTY Ach.</th>
             <th>ASP</th>
           </tr>
         </thead>
         <tbody>
-          ${
-            show
-              .map(
-                x =>
-                  `<tr>
-                    <td>${esc(x.k)}</td>
-                    <td>${money(x.a)}</td>
-                    <td class="${cls(x.aa)}">
-                      ${pct(x.aa)}
-                    </td>
-                    <td class="${
-                      x.a - x.t >= 0
-                        ? "good"
-                        : "critical"
-                    }">
-                      ${
-                        x.a - x.t >= 0
-                          ? "+"
-                          : ""
-                      }${money(x.a - x.t)}
-                    </td>
-                    <td>${num(x.q)}</td>
-                    <td class="${cls(x.qa)}">
-                      ${pct(x.qa)}
-                    </td>
-                    <td>${nf.format(x.asp)}</td>
-                  </tr>`
-              )
-              .join("")
-          }
+          ${show.map(x =>
+            `<tr>
+              <td>${esc(x.k)}</td>
+              <td>${money(x.a)}</td>
+              <td class="${cls(x.aa)}">${pct(x.aa)}</td>
+              <td class="${x.a - x.t >= 0 ? "good" : "critical"}">
+                ${x.a - x.t >= 0 ? "+" : ""}${money(x.a - x.t)}
+              </td>
+              <td>${num(x.q)}</td>
+              <td class="${cls(x.qa)}">${pct(x.qa)}</td>
+              <td>${nf.format(x.asp)}</td>
+            </tr>`
+          ).join("")}
         </tbody>
       </table>
     </div>`;
 }
 
-
-/* =========================================================
+/* ===========================
    RENDER
-   ========================================================= */
+=========================== */
 
 function render() {
-
-  /*
-    Rebuild dependent filters first
-  */
   refreshDependent();
 
-  /*
-    KPI / Product / Area / Shop
-    use selected MONTH
-  */
   const rows = activeRows();
 
   updateKPIs(rows);
-
-  renderTrend(rows);
-
+  renderTrend();
   renderProduct(rows);
-
   renderArea(rows);
-
   renderShops(rows);
 }
 
-
-/* =========================================================
+/* ===========================
    EVENTS
-   ========================================================= */
+=========================== */
 
 Object.keys(filters).forEach(id => {
-
-  $(id).addEventListener(
-    "change",
-    render
-  );
-
+  $(id).addEventListener("change", render);
 });
 
+$("resetBtn").addEventListener("click", () => {
+  Object.keys(filters).forEach(id => $(id).value = "");
 
-$("resetBtn").addEventListener(
-  "click",
-  () => {
+  $("fYear").value = "2026";
+  $("fMonth").value = "8";
 
-    Object.keys(filters).forEach(
-      id => $(id).value = ""
-    );
+  render();
+});
 
-    $("fYear").value = "2026";
-    $("fMonth").value = "8";
-
-    render();
-
-  }
-);
-
-
-/* =========================================================
+/* ===========================
    START
-   ========================================================= */
+=========================== */
 
 populate();
-
 render();
