@@ -583,15 +583,16 @@ function renderProduct(rows) {
 
       return {
         product,
+        target: a.targetAmount,
         amount: a.amount,
         ach,
-        qty: a.qty,
         targetQty: a.targetQty,
+        qty: a.qty,
         qAch,
         asp
       };
-
-    })
+   
+     })
     .sort((a,b) =>
       b.amount - a.amount
     );
@@ -605,10 +606,11 @@ function renderProduct(rows) {
 
         <tr>
           <th>Product</th>
+          <th>Target Net Amount</th>
           <th>Net Amount</th>
           <th>Net Amt Ach.</th>
-          <th>QTY</th>
           <th>Target QTY</th>
+          <th>QTY</th>
           <th>QTY Ach.</th>
           <th>ASP</th>
         </tr>
@@ -626,6 +628,10 @@ function renderProduct(rows) {
             </td>
 
             <td>
+              ${money(x.target)}
+            </td>
+
+            <td>
               ${money(x.amount)}
             </td>
 
@@ -634,11 +640,11 @@ function renderProduct(rows) {
             </td>
 
             <td>
-              ${num(x.qty)}
+              ${num(x.targetQty)}
             </td>
 
             <td>
-              ${num(x.targetQty)}
+              ${num(x.qty)}
             </td>
 
             <td class="${statusClass(x.qAch)}">
