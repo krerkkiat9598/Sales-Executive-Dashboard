@@ -904,9 +904,9 @@ function render() {
 
   renderInsight(rows);
 
-  renderTrend(rows);
+  renderTrend(baseData());
 
-  renderQtyTrend(rows);
+  renderQtyTrend(baseData());
 
   renderProduct(rows);
 
