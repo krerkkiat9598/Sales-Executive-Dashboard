@@ -581,6 +581,9 @@ function renderProduct(rows) {
           ? a.amount / a.qty
           : 0;
 
+      const gap =
+      a.amount - a.targetAmount;
+
       return {
         product,
         target: a.targetAmount,
@@ -590,6 +593,7 @@ function renderProduct(rows) {
         qty: a.qty,
         qAch,
         asp
+        gap
       };
    
      })
@@ -613,6 +617,7 @@ function renderProduct(rows) {
           <th>QTY</th>
           <th>QTY Ach.</th>
           <th>ASP</th>
+          <th>Gap</th>
         </tr>
 
       </thead>
@@ -654,6 +659,10 @@ function renderProduct(rows) {
             <td>
               ${num(x.asp)}
             </td>
+
+           <td class="${x.gap >= 0 ? "good" : "critical"}">
+           ${x.gap >= 0 ? "+" : ""}${money(x.gap)}
+           </td>
 
           </tr>
 
