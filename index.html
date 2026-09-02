@@ -12,7 +12,7 @@
     <div>
       <div class="eyebrow">W&W EXECUTIVE DASHBOARD</div>
       <h1>Sales Executive Dashboard</h1>
-      <div id="subtitle">Company Overview • Net Amount + Volume Performance</div>
+      <div id="subtitle">Company Overview • Net Amount + QTY Performance</div>
     </div>
     <div class="brand">SALES PERFORMANCE</div>
   </header>
@@ -32,23 +32,23 @@
     <section class="hero-grid">
       <div class="kpi amount">
         <span>NET AMOUNT</span><strong id="kAmount">-</strong>
-        <small>Target <b id="kAmountTarget">-</b></small>
+        <small>Target Net Amount <b id="kAmountTarget">-</b></small>
       </div>
       <div class="kpi amount">
-        <span>AMOUNT ACHIEVEMENT</span><strong id="kAmountAch">-</strong>
-        <small>Gap <b id="kAmountGap">-</b></small>
+        <span>NET AMOUNT ACHIEVEMENT</span><strong id="kAmountAch">-</strong>
+        <small>Net Amount Gap <b id="kAmountGap">-</b></small>
       </div>
       <div class="kpi volume">
-        <span>VOLUME</span><strong id="kQty">-</strong>
-        <small>Target <b id="kQtyTarget">-</b></small>
+        <span>QTY</span><strong id="kQty">-</strong>
+        <small>Target QTY <b id="kQtyTarget">-</b></small>
       </div>
       <div class="kpi volume">
-        <span>VOLUME ACHIEVEMENT</span><strong id="kQtyAch">-</strong>
-        <small>Gap <b id="kQtyGap">-</b></small>
+        <span>QTY ACHIEVEMENT</span><strong id="kQtyAch">-</strong>
+        <small>QTY Gap <b id="kQtyGap">-</b></small>
       </div>
       <div class="kpi">
         <span>ASP</span><strong id="kAsp">-</strong>
-        <small>Net Amount / Volume</small>
+        <small>Net Amount / QTY</small>
       </div>
       <div class="kpi">
         <span>STATUS</span><strong id="kStatus">-</strong>
@@ -67,14 +67,14 @@
         <div id="trendChart" class="chart"></div>
       </div>
       <div class="card">
-        <div class="card-head"><h2>Volume Performance</h2><span>Actual vs Target</span></div>
+        <div class="card-head"><h2>QTY Performance</h2><span>Actual vs Target</span></div>
         <div id="volumeChart" class="chart"></div>
       </div>
     </section>
 
     <section class="two-col">
       <div class="card">
-        <div class="card-head"><h2>Product Performance</h2><span>Amount + Volume</span></div>
+        <div class="card-head"><h2>Product Performance</h2><span>Net Amount + QTY</span>
         <div id="productTable"></div>
       </div>
       <div class="card">
@@ -84,7 +84,7 @@
     </section>
 
     <section class="card">
-      <div class="card-head"><h2>Shop Performance</h2><span>Value + Volume + Gap</span></div>
+      <div class="card-head"><h2>Shop Performance</h2><span>Net Amount + QTY + Gap</span></div>
       <div id="shopTable"></div>
     </section>
 
