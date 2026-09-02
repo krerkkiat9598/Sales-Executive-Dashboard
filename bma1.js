@@ -730,10 +730,11 @@ function renderShop(rows) {
 
         <tr>
           <th>Shop</th>
+          <th>Target Net Amount</th>
           <th>Net Amount</th>
           <th>Ach.</th>
-          <th>QTY</th>
           <th>Target QTY</th>
+          <th>QTY</th>
           <th>QTY Ach.</th>
           <th>ASP</th>
           <th>Gap</th>
@@ -752,6 +753,10 @@ function renderShop(rows) {
             </td>
 
             <td>
+              ${money(x.target)}
+            </td>
+
+            <td>
               ${money(x.amount)}
             </td>
 
@@ -760,11 +765,11 @@ function renderShop(rows) {
             </td>
 
             <td>
-              ${num(x.qty)}
+            ${num(x.targetQty)}
             </td>
 
             <td>
-            ${num(x.targetQty)}
+              ${num(x.qty)}
             </td>
 
             <td class="${statusClass(x.qAch)}">
