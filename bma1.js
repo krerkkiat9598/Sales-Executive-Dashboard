@@ -586,6 +586,7 @@ function renderProduct(rows) {
         amount: a.amount,
         ach,
         qty: a.qty,
+        targetQty: a.targetQty,
         qAch,
         asp
       };
@@ -607,6 +608,7 @@ function renderProduct(rows) {
           <th>Net Amount</th>
           <th>Net Amt Ach.</th>
           <th>QTY</th>
+          <th>Target QTY</th>
           <th>QTY Ach.</th>
           <th>ASP</th>
         </tr>
@@ -633,6 +635,10 @@ function renderProduct(rows) {
 
             <td>
               ${num(x.qty)}
+            </td>
+
+            <td>
+              ${num(x.targetQty)}
             </td>
 
             <td class="${statusClass(x.qAch)}">
@@ -681,6 +687,11 @@ function renderShop(rows) {
           ? a.amount / a.targetAmount
           : 0;
 
+      const qAch =
+       a.targetQty
+         ? a.qty / a.targetQty
+         : 0;
+      
       const gap =
         a.amount - a.targetAmount;
 
@@ -695,6 +706,8 @@ function renderShop(rows) {
         target: a.targetAmount,
         ach,
         qty: a.qty,
+        targetQty: a.targetQty,
+        qAch,
         asp,
         gap
       };
@@ -720,6 +733,8 @@ function renderShop(rows) {
           <th>Net Amount</th>
           <th>Ach.</th>
           <th>QTY</th>
+          <th>Target QTY</th>
+          <th>QTY Ach.</th>
           <th>ASP</th>
           <th>Gap</th>
         </tr>
@@ -746,6 +761,14 @@ function renderShop(rows) {
 
             <td>
               ${num(x.qty)}
+            </td>
+
+            <td>
+            ${num(x.targetQty)}
+            </td>
+
+            <td class="${statusClass(x.qAch)}">
+             ${pct(x.qAch)}
             </td>
 
             <td>
