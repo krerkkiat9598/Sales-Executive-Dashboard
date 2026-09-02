@@ -788,6 +788,8 @@ function renderMessages(rows) {
       ? a.qty / a.targetQty
       : 0;
 
+  /* Product performance */
+
   const products =
     uniq(rows.map(r => r.PRODUCT))
       .map(product => {
@@ -818,6 +820,38 @@ function renderMessages(rows) {
     products[0];
 
 
+  /* Shop performance */
+
+  const shops =
+    uniq(rows.map(r => r.SHOP_NAME))
+      .map(shop => {
+
+        const r =
+          rows.filter(x =>
+            x.SHOP_NAME === shop
+          );
+
+        const x =
+          aggregate(r);
+
+        return {
+          shop,
+          amount: x.amount,
+          gap:
+            x.amount - x.targetAmount
+        };
+
+      })
+      .sort((a,b) =>
+        a.gap - b.gap
+      );
+
+  const focusShop =
+    shops[0];
+
+
+  /* Key Message */
+
   $("keyMessage").innerHTML = `
 
     <ul>
@@ -831,6 +865,16 @@ function renderMessages(rows) {
         QTY Achievement:
         <b>${pct(qtyAch)}</b>
       </li>
+
+      ${
+        focusShop
+          ? `<li>
+              Largest Shop Gap:
+              <b>${esc(focusShop.shop)}</b>
+              (${focusShop.gap >= 0 ? "+" : ""}${money(focusShop.gap)})
+             </li>`
+          : ""
+      }
 
       ${
         weakest
@@ -847,35 +891,46 @@ function renderMessages(rows) {
   `;
 
 
+  /* Management Action */
+
   $("actionMessage").innerHTML = `
 
     <ul>
 
       <li>
-        Protect high-value sales contributors
-        while closing the QTY gap.
+        Protect DEVICE and other
+        high-value sales contributors.
       </li>
 
       <li>
-        Focus recovery actions on
-        under-target products and shops.
+        Close the QTY gap while
+        maintaining Net Amount achievement.
       </li>
 
-      <li>
-        Prioritize shops with large
-        Net Amount gaps for management follow-up.
-      </li>
+      ${
+        focusShop
+          ? `<li>
+              Prioritize recovery at
+              <b>${esc(focusShop.shop)}</b>
+              (${focusShop.gap >= 0 ? "+" : ""}${money(focusShop.gap)})
+             </li>`
+          : ""
+      }
+
+      ${
+        weakest
+          ? `<li>
+              Review low-performing product:
+              <b>${esc(weakest.product)}</b>
+            </li>`
+          : ""
+      }
 
     </ul>
 
   `;
 
 }
-
-
-/* =========================================================
-   SUBTITLE
-========================================================= */
 
 function renderSubtitle() {
 
