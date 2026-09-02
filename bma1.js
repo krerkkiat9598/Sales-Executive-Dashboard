@@ -592,7 +592,7 @@ function renderProduct(rows) {
         targetQty: a.targetQty,
         qty: a.qty,
         qAch,
-        asp
+        asp,
         gap
       };
    
