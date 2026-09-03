@@ -209,5 +209,14 @@ $("shop").addEventListener("change",render);
 $("reset").addEventListener("click",()=>{ $("year").value=2026;$("month").value=8;$("channel").value="All Channels";updateShops();$("shop").value="All Shops";render();});
 fillFilters();render();
 </script>
+  <script>
+(function(){
+  const back = document.querySelector("a.back");
+  if(back){
+    back.href = "index.html";
+    back.textContent = "← Company Overview";
+  }
+})();
+</script>
 </body>
 </html>
