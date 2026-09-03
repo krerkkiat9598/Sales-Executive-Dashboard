@@ -754,4 +754,22 @@ __buildData();
 init();
 
 </script>
+  <script>
+(function(){
+  const back = document.createElement("a");
+  back.href = "index.html";
+  back.textContent = "← Company Overview";
+
+  back.style.cssText = `
+    display:inline-block;
+    margin:0 0 16px 0;
+    color:#0b63ce;
+    font-weight:700;
+    text-decoration:none;
+  `;
+
+  const app = document.querySelector(".app");
+  if(app) app.prepend(back);
+})();
+</script>
 </body></html>
