@@ -176,14 +176,15 @@ function render(){
 
   const isShopSelected = shop !== "All Shops";
   const topShop=shops.find(x=>x.delta>0)||null, negShop=[...shops].filter(x=>x.delta<0).sort((a,b)=>a.delta-b.delta)[0]||null;
+  const selectedShopLabel = escapeHtml(shop);
   const action2 = isShopSelected
-    ? `รักษา Momentum ของ <b>${escapeHtml(shop)}</b> โดยผลักดัน SIM_TYPE ที่มี MOM เป็นบวก<br><span class="muted">ใช้ Driver ที่เติบโตเพื่อเพิ่ม QTY โดยรักษา ASP</span>`
+    ? `รักษา Momentum ของ <b>${selectedShopLabel}</b> โดยผลักดัน SIM_TYPE ที่มี MOM เป็นบวก<br><span class="muted">ใช้ Driver ที่เติบโตเพื่อเพิ่ม QTY โดยรักษา ASP</span>`
     : `ขยาย SIM_TYPE ที่มี MOM เป็นบวกไปยัง Shop ที่ยังมี Gap<br><span class="muted">ใช้ Driver ที่เติบโตเพื่อเพิ่ม QTY โดยรักษา ASP</span>`;
   const action4 = isShopSelected
-    ? `จัดลำดับทรัพยากรภายใน <b>${escapeHtml(shop)}</b><br><span class="muted">เน้น SIM_TYPE ที่สร้าง Growth และมีโอกาสเพิ่ม QTY</span>`
+    ? `จัดลำดับทรัพยากรภายใน <b>${selectedShopLabel}</b><br><span class="muted">เน้น SIM_TYPE ที่สร้าง Growth และมีโอกาสเพิ่ม QTY</span>`
     : (topShop ? `สนับสนุน Shop ที่สร้าง Growth สูง เช่น <b>${escapeHtml(topShop.name)}</b>` : `สนับสนุน Shop ที่สร้าง Growth สูง`);
   const action5 = isShopSelected
-    ? `ติดตาม <b>${escapeHtml(shop)}</b> เป็นพิเศษ<br><span class="muted">ดู MOM Net Amount, MOM QTY และ SIM_TYPE Driver รายเดือน</span>`
+    ? `ติดตาม <b>${selectedShopLabel}</b> เป็นพิเศษ<br><span class="muted">ดู MOM Net Amount, MOM QTY และ SIM_TYPE Driver รายเดือน</span>`
     : (negShop ? `ติดตาม <b>${escapeHtml(negShop.name)}</b> เป็นพิเศษ` : `ติดตาม Shop ที่มี MOM ติดลบเป็นพิเศษ`);
   $("actions").innerHTML=`
     <div class="action"><h3>1. รักษา Momentum</h3><ul>
