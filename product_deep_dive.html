@@ -18,6 +18,47 @@
 .filters .filter{min-width:0}
 .filters .filter select{min-width:0;max-width:100%;display:block}
 
+
+/* Final 7-filter sizing fix */
+.filters{
+  width:100%;
+  box-sizing:border-box;
+  grid-template-columns:repeat(7,minmax(0,1fr)) !important;
+}
+.filters > .filter{
+  width:100%;
+  min-width:0 !important;
+  box-sizing:border-box;
+}
+.filters > .filter label{
+  display:block;
+}
+.filters > .filter select{
+  width:100% !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+}
+
+
+/* FINAL: all seven filters are grid items */
+.filters{
+  display:grid !important;
+  grid-template-columns:repeat(7,minmax(0,1fr)) !important;
+  gap:12px !important;
+}
+.filters > .filter{
+  min-width:0 !important;
+  width:100% !important;
+  box-sizing:border-box !important;
+}
+.filters > .filter select{
+  width:100% !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+}
+
 </style>
 </head>
 <body>
@@ -30,7 +71,7 @@
     <div class="filter"><label>BRAND</label><select id="brand"></select></div>
     <div class="filter"><label>MODEL</label><select id="model"></select></div>
     <div class="filter"><label>CHANNEL</label><select id="channel"></select></div>
-      <div class="filter-item"><label>SHOP</label><select id="shop"><option value="">All Shops</option></select></div>
+      <div class="filter"><label>SHOP</label><select id="shop"><option value="">All Shops</option></select></div>
   </section>
   <section class="kpis">
     <div class="kpi"><span>NET AMOUNT</span><strong id="amount">-</strong></div>
