@@ -89,10 +89,13 @@
 
 /* Executive Insight — management summary */
 .insight{
-  line-height:1.55 !important;
-  padding:13px 16px !important;
-  font-size:13px !important;
+  line-height:1.45 !important;
+  padding:11px 14px !important;
+  font-size:12.5px !important;
 }
+.insight-title{font-size:14px;font-weight:800;margin-bottom:4px}
+.insight-line{margin-top:3px}
+.insight-note{margin-top:5px;font-size:11px;color:#5d7692}
 .insight-title{
   font-size:14px;
   font-weight:800;
@@ -333,8 +336,20 @@ function render(){
     ? `ระดับสาขา/ร้านค้า ปัจจัยบวกหลักคือ <b>${esc(topShopPos.shop)}</b> <b>${topShopPos.delta>=0?'+':''}${money(topShopPos.delta)}</b>${topShopNeg?` ขณะที่ <b>${esc(topShopNeg.shop)}</b> เป็นปัจจัยลบ <b>${money(topShopNeg.delta)}</b>`:''}`
     : 'ระดับสาขา/ร้านค้าไม่พบปัจจัยบวกจากเดือนก่อน';
 
-  $('insight').innerHTML=
-    `<b>สรุปสาระสำคัญสำหรับผู้บริหาร:</b> ${esc(scopeLabel)} | ${monthNames[m]||'เดือน '+m} ${$('year').value} มียอดขายสุทธิ <b>${money(a.a)}</b> ปริมาณขาย <b>${num(a.q)}</b> และราคาขายเฉลี่ย <b>${num(a.q?a.a/a.q:0)}</b> โดยยอดขายสุทธิเปลี่ยนแปลงจากเดือนก่อน <b>${mom===null?'ไม่สามารถคำนวณได้':(mom>=0?'+':'')+pct(mom)}</b>. ${impactText}. ${brandText}. ${modelText}. ${shopText}. ทั้งนี้ การเปรียบเทียบ YoY ในระดับ Brand/Model ยังไม่สามารถคำนวณได้ เนื่องจากข้อมูลรายละเอียด Device/GIA ที่มีอยู่เริ่มตั้งแต่ปี 2026.`;
+  const primaryDriver=[
+    {name:'ปริมาณขาย',v:qtyImpact},
+    {name:'ราคาขายเฉลี่ย',v:aspImpact},
+    {name:'ผลกระทบร่วม',v:interaction}
+  ].sort((x,y)=>Math.abs(y.v)-Math.abs(x.v))[0];
+
+  $('insight').innerHTML = `
+    <div class="insight-title">สรุปผลการดำเนินงานและปัจจัยขับเคลื่อน</div>
+    <div class="insight-line"><b>ผลการดำเนินงาน:</b> ${esc(scopeLabel)} | ${monthNames[m]||'เดือน '+m} ${$('year').value} มียอดขายสุทธิ <b>${money(a.a)}</b> ปริมาณขาย <b>${num(a.q)}</b> และราคาขายเฉลี่ย <b>${num(a.q?a.a/a.q:0)}</b> โดยยอดขายสุทธิเปลี่ยนแปลงจากเดือนก่อน <b>${mom===null?'ไม่สามารถคำนวณได้':(mom>=0?'+':'')+pct(mom)}</b></div>
+    <div class="insight-line"><b>ปัจจัยขับเคลื่อน:</b> ${impactText} โดยปัจจัยที่มีอิทธิพลสูงสุดคือ <b>${primaryDriver.name}</b></div>
+    <div class="insight-line"><b>Brand:</b> ${brandText.replace('ระดับแบรนด์ ','')} &nbsp; <b>Model:</b> ${modelText.replace('ระดับรุ่น ','')}</div>
+    <div class="insight-line"><b>Shop:</b> ${shopText.replace('ระดับสาขา/ร้านค้า ','')}</div>
+    <div class="insight-note"><b>ข้อจำกัดข้อมูล:</b> การเปรียบเทียบ YoY ในระดับ Brand/Model ยังไม่สามารถคำนวณได้ เนื่องจากข้อมูลรายละเอียด Device/GIA ที่มีอยู่เริ่มตั้งแต่ปี 2026</div>
+  `;
 
   // Executive drill-down: Brand → Model → Shop.
   // Clicking a Brand sets the BRAND filter and resets MODEL/SHOP.
