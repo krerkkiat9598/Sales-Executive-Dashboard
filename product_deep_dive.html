@@ -107,6 +107,47 @@
   color:#5d7692;
 }
 
+/* Growth Decomposition — compact executive cards */
+.driver-panel{margin-bottom:14px}
+.driver-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+.driver-card{
+  border:1px solid #d8e3ef;
+  border-radius:10px;
+  padding:12px 14px;
+  background:#fff;
+  min-height:72px;
+  box-sizing:border-box;
+}
+.driver-label{
+  font-size:11px;
+  font-weight:700;
+  color:#52708f;
+  letter-spacing:.2px;
+}
+.driver-value{
+  font-size:20px;
+  font-weight:800;
+  margin-top:5px;
+}
+.driver-note{
+  font-size:10.5px;
+  color:#6b86a3;
+  margin-top:4px;
+  line-height:1.35;
+}
+.driver-value.positive{color:#008a68}
+.driver-value.negative{color:#e11}
+@media(max-width:900px){
+  .driver-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:600px){
+  .driver-grid{grid-template-columns:1fr}
+}
+
 </style>
 </head>
 <body>
@@ -292,41 +333,8 @@ function render(){
     ? `ระดับสาขา/ร้านค้า ปัจจัยบวกหลักคือ <b>${esc(topShopPos.shop)}</b> <b>${topShopPos.delta>=0?'+':''}${money(topShopPos.delta)}</b>${topShopNeg?` ขณะที่ <b>${esc(topShopNeg.shop)}</b> เป็นปัจจัยลบ <b>${money(topShopNeg.delta)}</b>`:''}`
     : 'ระดับสาขา/ร้านค้าไม่พบปัจจัยบวกจากเดือนก่อน';
 
-  const direction = totalImpact>0 ? 'เพิ่มขึ้น' : totalImpact<0 ? 'ลดลง' : 'ทรงตัว';
-  const directionPct = mom===null ? 'ไม่สามารถคำนวณได้' : (mom>=0?'+':'')+pct(mom);
-  const driverRank = [
-    {name:'ปริมาณขาย',v:qtyImpact},
-    {name:'ราคาขายเฉลี่ย',v:aspImpact},
-    {name:'ผลกระทบร่วม',v:interaction}
-  ].sort((x,y)=>Math.abs(y.v)-Math.abs(x.v));
-  const primaryDriver = driverRank[0];
-
-  $('insight').innerHTML = `
-    <div class="insight-title">สรุปผลการดำเนินงานและปัจจัยขับเคลื่อน</div>
-    <div class="insight-line">
-      <b>ผลการดำเนินงาน:</b> ${esc(scopeLabel)} ใน${monthNames[m]||'เดือน '+m} ${$('year').value}
-      มียอดขายสุทธิ <b>${money(a.a)}</b> ปริมาณขาย <b>${num(a.q)}</b> และราคาขายเฉลี่ย <b>${num(a.q?a.a/a.q:0)}</b>
-      โดยยอดขายสุทธิ${direction} <b>${money(Math.abs(totalImpact))}</b> หรือ <b>${directionPct}</b> เมื่อเทียบกับเดือนก่อน
-    </div>
-    <div class="insight-line">
-      <b>ปัจจัยหลัก:</b> ${primaryDriver.name} เป็นปัจจัยที่มีอิทธิพลสูงสุดต่อการเปลี่ยนแปลงยอดขายสุทธิ
-      โดยมีผลกระทบ <b>${primaryDriver.v>=0?'+':''}${money(primaryDriver.v)}</b>
-      รองลงมา ได้แก่ ปริมาณขาย <b>${qtyImpact>=0?'+':''}${money(qtyImpact)}</b>,
-      ราคาขายเฉลี่ย <b>${aspImpact>=0?'+':''}${money(aspImpact)}</b>
-      และผลกระทบร่วม <b>${interaction>=0?'+':''}${money(interaction)}</b>
-    </div>
-    <div class="insight-line">
-      <b>Brand:</b> ${brandText.replace('ระดับแบรนด์ ','')}
-      <b>Model:</b> ${modelText.replace('ระดับรุ่น ','')}
-    </div>
-    <div class="insight-line">
-      <b>Shop:</b> ${shopText.replace('ระดับสาขา/ร้านค้า ','')}
-    </div>
-    <div class="insight-note">
-      <b>ข้อจำกัดข้อมูล:</b> การเปรียบเทียบ YoY ในระดับ Brand/Model ยังไม่สามารถคำนวณได้
-      เนื่องจากข้อมูลรายละเอียด Device/GIA ที่มีอยู่เริ่มตั้งแต่ปี 2026
-    </div>
-  `;
+  $('insight').innerHTML=
+    `<b>สรุปสาระสำคัญสำหรับผู้บริหาร:</b> ${esc(scopeLabel)} | ${monthNames[m]||'เดือน '+m} ${$('year').value} มียอดขายสุทธิ <b>${money(a.a)}</b> ปริมาณขาย <b>${num(a.q)}</b> และราคาขายเฉลี่ย <b>${num(a.q?a.a/a.q:0)}</b> โดยยอดขายสุทธิเปลี่ยนแปลงจากเดือนก่อน <b>${mom===null?'ไม่สามารถคำนวณได้':(mom>=0?'+':'')+pct(mom)}</b>. ${impactText}. ${brandText}. ${modelText}. ${shopText}. ทั้งนี้ การเปรียบเทียบ YoY ในระดับ Brand/Model ยังไม่สามารถคำนวณได้ เนื่องจากข้อมูลรายละเอียด Device/GIA ที่มีอยู่เริ่มตั้งแต่ปี 2026.`;
 
   // Executive drill-down: Brand → Model → Shop.
   // Clicking a Brand sets the BRAND filter and resets MODEL/SHOP.
