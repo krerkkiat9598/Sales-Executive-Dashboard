@@ -434,6 +434,18 @@ function render(){
   const driverName = primaryDriver.name;
   const driverValue = fmtDelta(primaryDriver.v);
 
+  // WHY diagnosis: decompose MOM change into QTY, ASP and interaction.
+  const qtyDirection = qtyImpact > 0 ? 'เพิ่มขึ้น' : qtyImpact < 0 ? 'ลดลง' : 'ทรงตัว';
+  const aspDirection = aspImpact > 0 ? 'เพิ่มขึ้น' : aspImpact < 0 ? 'ลดลง' : 'ทรงตัว';
+  const whyText = `
+    ปริมาณขาย (QTY) ${qtyDirection} <b>${fmtDelta(qtyImpact)}</b>
+    และราคาขายเฉลี่ย (ASP) ${aspDirection} <b>${fmtDelta(aspImpact)}</b>
+    โดยมีผลกระทบร่วม <b>${fmtDelta(interaction)}</b>
+  `;
+  const whyAction = Math.abs(qtyImpact) >= Math.abs(aspImpact)
+    ? 'ควรให้น้ำหนักกับ QTY เป็นลำดับแรก โดยตรวจสอบ Availability, Conversion และ Sales Execution'
+    : 'ควรให้น้ำหนักกับ ASP เป็นลำดับแรก โดยตรวจสอบ Product Mix, รุ่นราคาสูง และระดับราคาขาย';
+
   // Build Action Recommendation strictly from the current drill-down scope.
   // Hierarchy: Overall → Product → Brand → Model → Shop.
   const focusBrand = b!=='All Brands' ? brands.find(x=>clean(x.brand)===clean(b)) : null;
@@ -460,7 +472,8 @@ function render(){
     maintainText = `
       • รักษายอดขายของ <b>${esc(focusName)}</b> ที่ <b>${money(a.a)}</b> และ QTY <b>${num(a.q)}</b> โดย MOM <b>${focusMom===null?'—':(focusMom>=0?'+':'')+pct(focusMom)}</b><br>
       • รักษา Model ที่เป็น Growth Driver ${posModel?`<b>${esc(posModel.model)}</b> <b>${fmtDelta(posModel.delta)}</b>`:'ที่มี Contribution เป็นบวก'} และติดตาม Availability ให้ต่อเนื่อง<br>
-      • ควบคุม ASP <b>${safeAsp(a)}</b> ควบคู่กับ QTY เพื่อให้ยอดขายเติบโตอย่างมีคุณภาพ
+      • ควบคุม ASP <b>${safeAsp(a)}</b> ควบคู่กับ QTY เพื่อให้ยอดขายเติบโตอย่างมีคุณภาพ<br>
+      • <b>WHY:</b> ${whyText} → ${whyAction}
     `;
     growText = posModel ? `
       • ขยาย <b>${esc(posModel.model)}</b> ซึ่งเป็น Growth Driver ของ Shop ด้วย Contribution <b>${fmtDelta(posModel.delta)}</b><br>
@@ -472,7 +485,8 @@ function render(){
     `;
     fixText = negModel ? `
       • เร่งแก้ <b>${esc(negModel.model)}</b> ซึ่งเป็น Negative Driver <b>${fmtDelta(negModel.delta)}</b><br>
-      • ตรวจสอบสาเหตุลงไปที่ <b>QTY / ASP / Stock Availability / Sales Execution</b> ก่อนกำหนดมาตรการแก้ไข<br>
+      • <b>WHY:</b> ${whyText} → ให้ตรวจสอบ ${Math.abs(qtyImpact)>=Math.abs(aspImpact)?'<b>QTY</b> เป็นลำดับแรก':'<b>ASP</b> เป็นลำดับแรก'}<br>
+      • ตรวจสอบต่อไปที่ <b>Stock Availability / Sales Execution / Product Mix</b> ก่อนกำหนดมาตรการแก้ไข<br>
       • กำหนด Recovery Plan ราย Model พร้อมผู้รับผิดชอบและรอบติดตามผลที่ชัดเจน
     ` : `
       • ไม่พบ Negative Model ที่มีนัยสำคัญใน Shop นี้ แต่ควรเฝ้าระวัง Model ที่ MOM ชะลอตัว<br>
@@ -481,7 +495,9 @@ function render(){
     resourceText = `
       • จัดสรร <b>Stock / Sales Effort / Promotion</b> ให้กับ Model ที่มี Contribution สูงสุดใน <b>${esc(focusName)}</b><br>
       • หาก QTY เป็นตัวขับเคลื่อนหลัก ให้เพิ่ม Availability และ Conversion; หาก ASP เป็นตัวขับเคลื่อนหลัก ให้เน้น Product Mix รุ่นมูลค่าสูง<br>
-      • ใช้ข้อมูลราย Model เป็นฐานกำหนดทรัพยากร ไม่ใช้มาตรการเดียวกับทุกสินค้า
+      • ใช้ข้อมูลราย Model เป็นฐานกำหนดทรัพยากร ไม่ใช้มาตรการเดียวกับทุกสินค้า<br>
+      • ทรัพยากรต้องสอดคล้องกับ WHY: ${Math.abs(qtyImpact)>=Math.abs(aspImpact)?'เน้น Availability / Stock / Sales Conversion':'เน้น Product Mix / รุ่นมูลค่าสูง / ASP'}<br>
+      • <b>WHY:</b> ${whyText} → ${whyAction}
     `;
     monitorText = `
       • ติดตาม <b>Net Amount / QTY / ASP / MOM</b> ของ <b>${esc(focusName)}</b> เทียบเดือนก่อนเป็นรายสัปดาห์<br>
@@ -507,7 +523,8 @@ function render(){
     `;
     fixText = negShop ? `
       • เร่งแก้ไข <b>${esc(negShop.shop)}</b> ซึ่งเป็น Negative Shop Driver <b>${fmtDelta(negShop.delta)}</b><br>
-      • ตรวจสอบ QTY, Stock Availability, Traffic/Conversion และ Sales Execution เพื่อระบุ Root Cause<br>
+      • <b>WHY:</b> ${whyText} → ${Math.abs(qtyImpact)>=Math.abs(aspImpact)?'<b>QTY</b> เป็นจุดตรวจหลัก':'<b>ASP</b> เป็นจุดตรวจหลัก'}<br>
+      • ตรวจสอบ QTY, Stock Availability, Traffic/Conversion, ASP และ Sales Execution เพื่อระบุ Root Cause<br>
       • จัดทำ Recovery Plan ราย Shop และติดตามผลเทียบ MOM จนกลับมาเป็นบวก
     ` : `
       • ยังไม่พบ Negative Shop ที่มีนัยสำคัญ แต่ให้ตรวจสอบ Shop ที่ MOM ชะลอตัวหรือ QTY ลดลง<br>
@@ -532,7 +549,8 @@ function render(){
     maintainText = `
       • รักษา <b>${esc(focusName)}</b> ซึ่งมียอดขายสุทธิ <b>${money(a.a)}</b> และ Contribution ต่อ MOM <b>${fmtDelta(focusDelta)}</b><br>
       • รักษา Model Growth Driver ${posModel?`<b>${esc(posModel.model)}</b> <b>${fmtDelta(posModel.delta)}</b>`:'ที่มี Contribution เป็นบวก'} และ Shop ที่รองรับ Demand ได้ดี<br>
-      • บริหาร Product Mix และ ASP เพื่อให้การเติบโตของ Brand มีทั้งปริมาณและมูลค่าที่เหมาะสม
+      • บริหาร Product Mix และ ASP เพื่อให้การเติบโตของ Brand มีทั้งปริมาณและมูลค่าที่เหมาะสม<br>
+      • <b>WHY:</b> ${whyText} → ${whyAction}
     `;
     growText = posModel ? `
       • เร่งขยาย <b>${esc(posModel.model)}</b> ซึ่งเป็น Model ที่สร้าง Contribution สูงสุดภายใน <b>${esc(focusName)}</b> <b>${fmtDelta(posModel.delta)}</b><br>
@@ -573,7 +591,8 @@ function render(){
     maintainText = `
       • รักษา <b>${esc(focusName)}</b> ที่มียอดขายสุทธิ <b>${money(a.a)}</b>, QTY <b>${num(a.q)}</b> และ MOM <b>${mom===null?'—':(mom>=0?'+':'')+pct(mom)}</b><br>
       • รักษา Brand Growth Driver ${posBrand?`<b>${esc(posBrand.brand)}</b> <b>${fmtDelta(posBrand.delta)}</b>`:'ที่มี Contribution เป็นบวก'} และ Model ที่สร้างยอดขายหลัก<br>
-      • ควบคุมทั้ง QTY และ ASP เพื่อให้การเติบโตของ Product มีคุณภาพและต่อเนื่อง
+      • ควบคุมทั้ง QTY และ ASP เพื่อให้การเติบโตของ Product มีคุณภาพและต่อเนื่อง<br>
+      • <b>WHY:</b> ${whyText} → ${whyAction}
     `;
     growText = posModel ? `
       • เร่งขยาย <b>${esc(posModel.model)}</b> ซึ่งเป็น Model Growth Driver <b>${fmtDelta(posModel.delta)}</b> ภายใน <b>${esc(focusName)}</b><br>
@@ -608,7 +627,8 @@ function render(){
     maintainText = `
       • รักษา Growth Driver หลัก <b>${topModelPos?esc(topModelPos.model):'—'}</b> ซึ่งสร้าง Contribution <b>${topModelPos?fmtDelta(topModelPos.delta):'—'}</b><br>
       • รักษา Brand ที่มี Contribution เป็นบวก และขยาย Best Practice จาก Shop ที่เติบโตไปยังพื้นที่ที่ยังมีศักยภาพ<br>
-      • ควบคุม QTY และ ASP ควบคู่กัน เพื่อให้ยอดขายเติบโตอย่างมีคุณภาพ
+      • ควบคุม QTY และ ASP ควบคู่กัน เพื่อให้ยอดขายเติบโตอย่างมีคุณภาพ<br>
+      • <b>WHY:</b> ${whyText} → ${whyAction}
     `;
     growText = topShopPos ? `
       • ขยายโอกาสใน <b>${esc(topShopPos.shop)}</b> ซึ่งสร้าง Shop Contribution สูงสุด <b>${fmtDelta(topShopPos.delta)}</b><br>
