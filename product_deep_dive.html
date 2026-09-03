@@ -78,6 +78,14 @@
   background:#f3f8ff;
 }
 
+
+/* Executive Insight — formal Thai management wording */
+.insight{
+  line-height:1.65 !important;
+  padding:14px 16px !important;
+  font-size:13px !important;
+}
+
 </style>
 </head>
 <body>
@@ -232,7 +240,39 @@ function render(){
     '</tbody></table>';
 
   const p=$('product').value||'All Products',b=$('brand').value||'All Brands',mo=$('model').value||'All Models';
-  $('insight').innerHTML=`<b>Executive Insight:</b> ${esc(p)}${b!=='All Brands'?' • '+esc(b):''}${mo!=='All Models'?' • '+esc(mo):''} | ${m}M Net Amount <b>${money(a.a)}</b>, QTY <b>${num(a.q)}</b>. MOM ${mom===null?'not available':(mom>=0?'+':'')+pct(mom)}. Brand/Model YOY requires 2025 detailed Device/GIA data; current detailed file starts in 2026.`;
+  const ch=$('channel').value||'All Channels',sh=$('shop').value||'All Shops';
+  const monthNames=['','มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  const scopeLabel=[p,b!=='All Brands'?b:null,mo!=='All Models'?mo:null,ch!=='All Channels'?ch:null,sh!=='All Shops'?sh:null].filter(Boolean).join(' • ');
+
+  const totalAbs= Math.abs(totalImpact)||0;
+  const qtyShare=totalAbs?(qtyImpact/totalAbs*100):0;
+  const aspShare=totalAbs?(aspImpact/totalAbs*100):0;
+  const intShare=totalAbs?(interaction/totalAbs*100):0;
+
+  const topBrandPos=brands.filter(x=>x.delta>0).sort((x,y)=>y.delta-x.delta)[0];
+  const topBrandNeg=brands.filter(x=>x.delta<0).sort((x,y)=>x.delta-y.delta)[0];
+  const topModelPos=modelData.filter(x=>x.delta>0).sort((x,y)=>y.delta-x.delta)[0];
+  const topModelNeg=modelData.filter(x=>x.delta<0).sort((x,y)=>x.delta-y.delta)[0];
+  const topShopPos=shops.filter(x=>x.delta>0).sort((x,y)=>y.delta-x.delta)[0];
+  const topShopNeg=shops.filter(x=>x.delta<0).sort((x,y)=>x.delta-y.delta)[0];
+
+  const impactText = totalImpact===0 ? 'ยอดขายสุทธิไม่เปลี่ยนแปลงจากเดือนก่อน' :
+    `การเปลี่ยนแปลงยอดขายสุทธิ <b>${totalImpact>=0?'+':''}${money(totalImpact)}</b> มาจากปริมาณขาย <b>${qtyImpact>=0?'+':''}${money(qtyImpact)}</b> (${qtyShare.toFixed(1)}%), ราคาขายเฉลี่ย <b>${aspImpact>=0?'+':''}${money(aspImpact)}</b> (${aspShare.toFixed(1)}%) และผลกระทบร่วม <b>${interaction>=0?'+':''}${money(interaction)}</b> (${intShare.toFixed(1)}%)`;
+
+  const brandText = topBrandPos
+    ? `ระดับแบรนด์ ปัจจัยบวกหลักคือ <b>${esc(topBrandPos.brand)}</b> <b>${topBrandPos.delta>=0?'+':''}${money(topBrandPos.delta)}</b>${topBrandNeg?` ขณะที่ <b>${esc(topBrandNeg.brand)}</b> เป็นปัจจัยลบ <b>${money(topBrandNeg.delta)}</b>`:''}`
+    : 'ระดับแบรนด์ไม่พบปัจจัยบวกจากเดือนก่อน';
+
+  const modelText = topModelPos
+    ? `ระดับรุ่น ปัจจัยขับเคลื่อนหลักคือ <b>${esc(topModelPos.model)}</b> <b>${topModelPos.delta>=0?'+':''}${money(topModelPos.delta)}</b>${topModelNeg?` และมีรุ่นที่หักล้างการเติบโตคือ <b>${esc(topModelNeg.model)}</b> <b>${money(topModelNeg.delta)}</b>`:''}`
+    : 'ระดับรุ่นไม่พบปัจจัยบวกจากเดือนก่อน';
+
+  const shopText = topShopPos
+    ? `ระดับสาขา/ร้านค้า ปัจจัยบวกหลักคือ <b>${esc(topShopPos.shop)}</b> <b>${topShopPos.delta>=0?'+':''}${money(topShopPos.delta)}</b>${topShopNeg?` ขณะที่ <b>${esc(topShopNeg.shop)}</b> เป็นปัจจัยลบ <b>${money(topShopNeg.delta)}</b>`:''}`
+    : 'ระดับสาขา/ร้านค้าไม่พบปัจจัยบวกจากเดือนก่อน';
+
+  $('insight').innerHTML=
+    `<b>สรุปสาระสำคัญสำหรับผู้บริหาร:</b> ${esc(scopeLabel)} | ${monthNames[m]||'เดือน '+m} ${$('year').value} มียอดขายสุทธิ <b>${money(a.a)}</b> ปริมาณขาย <b>${num(a.q)}</b> และราคาขายเฉลี่ย <b>${num(a.q?a.a/a.q:0)}</b> โดยยอดขายสุทธิเปลี่ยนแปลงจากเดือนก่อน <b>${mom===null?'ไม่สามารถคำนวณได้':(mom>=0?'+':'')+pct(mom)}</b>. ${impactText}. ${brandText}. ${modelText}. ${shopText}. ทั้งนี้ การเปรียบเทียบ YoY ในระดับ Brand/Model ยังไม่สามารถคำนวณได้ เนื่องจากข้อมูลรายละเอียด Device/GIA ที่มีอยู่เริ่มตั้งแต่ปี 2026.`;
 
   // Executive drill-down: Brand → Model → Shop.
   // Clicking a Brand sets the BRAND filter and resets MODEL/SHOP.
