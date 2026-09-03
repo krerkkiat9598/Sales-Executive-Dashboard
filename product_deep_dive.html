@@ -155,7 +155,7 @@
 /* Action Recommendation — full-width 5-step executive layout at bottom */
 .action-panel{width:100%;box-sizing:border-box;margin-top:14px;margin-bottom:18px}
 .action-grid-5{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;width:100%}
-.action-card{border:1px solid #d8e3ef;border-radius:10px;padding:14px 16px;background:#fff;min-height:178px;box-sizing:border-box}
+.action-card{border:1px solid #d8e3ef;border-radius:10px;padding:14px 16px;background:#fff;min-height:205px;box-sizing:border-box}
 .action-card:nth-child(1){grid-column:span 2}
 .action-card:nth-child(2){grid-column:span 2}
 .action-card:nth-child(3){grid-column:span 2}
@@ -165,7 +165,7 @@
 .action-no{display:flex;align-items:center;justify-content:center;flex:0 0 27px;width:27px;height:27px;border-radius:50%;font-weight:800;color:#fff;background:#1467c7;font-size:13px}
 .action-title{font-size:12px;font-weight:800;line-height:1.4;color:#153b63}
 .action-en{font-size:9px;color:#66809b;margin-top:2px}
-.action-text{font-size:11.5px;line-height:1.65;color:#183b5b}
+.action-text{font-size:11.5px;line-height:1.72;color:#183b5b}
 .action-text b{font-weight:800}
 .action-green{border-top:3px solid #15936b}.action-blue{border-top:3px solid #2878d5}
 .action-red{border-top:3px solid #e44b5d}.action-purple{border-top:3px solid #8064d9}
@@ -414,7 +414,7 @@ function render(){
     : level==='model' ? 'ระดับ Model'
     : level==='brand' ? 'ระดับ Brand'
     : level==='product' ? 'ระดับ Product' : 'ภาพรวม';
-  $('actionScopeLabel').textContent = `${levelLabel}: ${focusName} | WHAT → WHY → WHICH → WHERE → ACTION`;
+  $('actionScopeLabel').textContent = `Drill-down: ${scope || 'ภาพรวม'} | WHAT → WHY → WHICH → WHERE → ACTION`;
 
   const posDriver = level==='shop' ? null
     : level==='model' ? topModelPos
@@ -433,127 +433,204 @@ function render(){
   const driverName = primaryDriver.name;
   const driverValue = fmtDelta(primaryDriver.v);
 
-  let maintainText, growText, fixText, resourceText, monitorText;
+  // Build Action Recommendation strictly from the current drill-down scope.
+  // Hierarchy: Overall → Product → Brand → Model → Shop.
+  const focusBrand = b!=='All Brands' ? brands.find(x=>clean(x.brand)===clean(b)) : null;
+  const focusModel = mo!=='All Models' ? modelData.find(x=>clean(x.model)===clean(mo)) : null;
+  const focusShop  = sh!=='All Shops' ? shops.find(x=>clean(x.shop)===clean(sh)) : null;
+  const safeAsp = x => x && x.q ? num(x.a/x.q) : '0';
+
+  // Selected-scope movement. This is the key metric used by the Action cards.
+  const focusDelta = level==='shop' ? (focusShop ? focusShop.delta : totalImpact)
+    : level==='model' ? (focusModel ? focusModel.delta : totalImpact)
+    : level==='brand' ? (focusBrand ? focusBrand.delta : totalImpact)
+    : totalImpact;
+  const focusMom = level==='shop' ? (focusShop ? focusShop.mom : null)
+    : level==='model' ? (focusModel ? focusModel.mom : null)
+    : level==='brand' ? (focusBrand ? focusBrand.mom : null)
+    : mom;
+
+  let maintainText='', growText='', fixText='', resourceText='', monitorText='';
 
   if(level==='shop'){
+    const selected = focusShop;
+    const posModel = topModelPos;
+    const negModel = topModelNeg;
     maintainText = `
-      • รักษาฐานยอดขายของ <b>${esc(focusName)}</b> ซึ่งปัจจุบันมียอดขายสุทธิ <b>${money(a.a)}</b> และ QTY <b>${num(a.q)}</b><br>
-      • รักษา Model ที่สร้างยอดขายหลัก และกำหนดรายการ Top Model ที่ต้องรักษาเป็นรายเดือน<br>
-      • ใช้ <b>ASP ${num(a.q?a.a/a.q:0)}</b> เป็นฐานติดตามคุณภาพของยอดขาย ไม่เน้นเพิ่ม QTY เพียงอย่างเดียว
+      • รักษายอดขายของ <b>${esc(focusName)}</b> ที่ <b>${money(a.a)}</b> และ QTY <b>${num(a.q)}</b> โดย MOM <b>${focusMom===null?'—':(focusMom>=0?'+':'')+pct(focusMom)}</b><br>
+      • รักษา Model ที่เป็น Growth Driver ${posModel?`<b>${esc(posModel.model)}</b> <b>${fmtDelta(posModel.delta)}</b>`:'ที่มี Contribution เป็นบวก'} และติดตาม Availability ให้ต่อเนื่อง<br>
+      • ควบคุม ASP <b>${safeAsp(a)}</b> ควบคู่กับ QTY เพื่อให้ยอดขายเติบโตอย่างมีคุณภาพ
     `;
-    growText = `
-      • เพิ่มยอดขายที่ <b>${esc(focusName)}</b> โดยเน้นปัจจัยหลักคือ <b>${esc(driverName)}</b> (${driverValue})<br>
-      • เจาะ Model ที่มี Demand สูงและเพิ่ม Conversion จากลูกค้าที่เข้าร้าน โดยเฉพาะ Model ที่มี Δ MOM เป็นบวก<br>
-      • กำหนดเป้าหมายราย Model และติดตามผลเทียบเดือนก่อนเพื่อให้เห็นผลของ Action โดยตรง
-    `;
-    fixText = negDriver ? `
-      • เร่งแก้ไข Model <b>${esc(negDriver.model)}</b> ซึ่งเป็น Negative Driver <b>${fmtDelta(negDriver.delta)}</b><br>
-      • ตรวจสอบ <b>QTY / ASP / Availability / Sales Execution</b> และระบุสาเหตุที่เกิดขึ้นจริงในระดับร้าน<br>
-      • จัดทำ Recovery Plan พร้อมผู้รับผิดชอบและกำหนดวันติดตามผล
+    growText = posModel ? `
+      • ขยาย <b>${esc(posModel.model)}</b> ซึ่งเป็น Growth Driver ของ Shop ด้วย Contribution <b>${fmtDelta(posModel.delta)}</b><br>
+      • ตรวจสอบ Stock และ Conversion ของ Model ดังกล่าว และเพิ่มการนำเสนอในช่วงที่มี Demand สูง<br>
+      • กำหนดเป้าหมาย QTY รายสัปดาห์สำหรับ Model ที่มี Δ MOM เป็นบวก เพื่อเร่งยอดขายจากจุดที่พิสูจน์แล้ว
     ` : `
-      • ยังไม่พบ Negative Driver ที่มีนัยสำคัญในระดับ Model<br>
-      • ตรวจสอบ Model ที่มี MOM ต่ำหรือไม่มีการเติบโต เพื่อป้องกันการชะลอตัวในเดือนถัดไป
+      • ยังไม่พบ Model ที่สร้าง Contribution เป็นบวกอย่างมีนัยสำคัญใน Shop นี้<br>
+      • คัดเลือก Model ที่มี Demand สูงจาก Shop ใกล้เคียงมาเป็นโอกาสในการเพิ่ม QTY และ Conversion
+    `;
+    fixText = negModel ? `
+      • เร่งแก้ <b>${esc(negModel.model)}</b> ซึ่งเป็น Negative Driver <b>${fmtDelta(negModel.delta)}</b><br>
+      • ตรวจสอบสาเหตุลงไปที่ <b>QTY / ASP / Stock Availability / Sales Execution</b> ก่อนกำหนดมาตรการแก้ไข<br>
+      • กำหนด Recovery Plan ราย Model พร้อมผู้รับผิดชอบและรอบติดตามผลที่ชัดเจน
+    ` : `
+      • ไม่พบ Negative Model ที่มีนัยสำคัญใน Shop นี้ แต่ควรเฝ้าระวัง Model ที่ MOM ชะลอตัว<br>
+      • หาก QTY หรือ ASP ลดลงต่อเนื่อง ให้เปิดประเด็นวิเคราะห์สาเหตุทันที
     `;
     resourceText = `
-      • จัดสรรกำลังขายและ Stock ให้กับ Model ที่มี Demand สูงภายใน <b>${esc(focusName)}</b><br>
-      • หาก <b>QTY</b> เป็นปัจจัยหลัก ให้เน้น Availability / Stock / Sales Conversion; หาก <b>ASP</b> เป็นปัจจัยหลัก ให้เน้น Product Mix และรุ่นราคาสูง<br>
-      • กำหนดเป้าหมายรายสัปดาห์เพื่อให้สามารถปรับทรัพยากรได้ทันก่อนสิ้นเดือน
+      • จัดสรร <b>Stock / Sales Effort / Promotion</b> ให้กับ Model ที่มี Contribution สูงสุดใน <b>${esc(focusName)}</b><br>
+      • หาก QTY เป็นตัวขับเคลื่อนหลัก ให้เพิ่ม Availability และ Conversion; หาก ASP เป็นตัวขับเคลื่อนหลัก ให้เน้น Product Mix รุ่นมูลค่าสูง<br>
+      • ใช้ข้อมูลราย Model เป็นฐานกำหนดทรัพยากร ไม่ใช้มาตรการเดียวกับทุกสินค้า
     `;
     monitorText = `
-      • ติดตาม <b>Net Amount / QTY / ASP / MOM</b> ของร้านนี้เทียบเดือนก่อนและเทียบเป้าหมายที่เกี่ยวข้อง<br>
-      • ตรวจสอบ Top 3 Growth Model และ Top 3 Negative Model รายสัปดาห์ พร้อมระบุผู้รับผิดชอบแต่ละประเด็น<br>
-      • หาก Negative Driver ต่อเนื่อง 2 รอบ ให้จัดทำ Recovery Plan และยกระดับเป็นประเด็นแก้ไขเชิงบริหาร
+      • ติดตาม <b>Net Amount / QTY / ASP / MOM</b> ของ <b>${esc(focusName)}</b> เทียบเดือนก่อนเป็นรายสัปดาห์<br>
+      • ตรวจสอบ Top Growth / Negative Model และบันทึกผลของ Action ในแต่ละรอบ<br>
+      • หาก Negative Driver ต่อเนื่อง 2 รอบ ให้ยกระดับเป็น Recovery Plan พร้อมกำหนดเป้าหมายเดือนถัดไป
     `;
+
   } else if(level==='model'){
+    const posShop = topShopPos;
+    const negShop = topShopNeg;
     maintainText = `
-      • รักษา <b>${esc(focusName)}</b> ซึ่งมียอดขายสุทธิ <b>${money(a.a)}</b> และ QTY <b>${num(a.q)}</b><br>
-      • รักษา Shop ที่เป็นแหล่งยอดขายหลัก และถ่ายทอด Best Practice ไปยัง Shop ที่ยังมีศักยภาพ<br>
-      • ควบคุม ASP <b>${num(a.q?a.a/a.q:0)}</b> เพื่อรักษามูลค่ายอดขายต่อหน่วย
+      • รักษา <b>${esc(focusName)}</b> ซึ่งมียอดขายสุทธิ <b>${money(a.a)}</b>, QTY <b>${num(a.q)}</b> และ MOM <b>${focusMom===null?'—':(focusMom>=0?'+':'')+pct(focusMom)}</b><br>
+      • รักษา Shop ที่สร้าง Contribution สูง โดยเฉพาะ <b>${posShop?esc(posShop.shop):'Shop Growth Driver'}</b> ${posShop?`<b>${fmtDelta(posShop.delta)}</b>`:''}<br>
+      • ควบคุม ASP <b>${safeAsp(a)}</b> เพื่อรักษามูลค่าต่อหน่วยและป้องกันการเติบโตที่เกิดจาก QTY เพียงอย่างเดียว
     `;
-    growText = `
-      • ขยายการขาย <b>${esc(focusName)}</b> ไปยัง Shop ที่ยังมี Contribution ต่ำแต่มีศักยภาพ<br>
-      • ให้ความสำคัญกับ Shop ที่มี Δ MOM เป็นบวก และใช้เป็นต้นแบบด้าน Sales Execution<br>
-      • เพิ่ม Conversion / Cross-sell / Product Availability ตามสาเหตุที่พบในแต่ละ Shop
+    growText = posShop ? `
+      • ขยาย <b>${esc(focusName)}</b> ไปยัง Shop ที่มีศักยภาพ โดยใช้ <b>${esc(posShop.shop)}</b> ซึ่งสร้าง Contribution <b>${fmtDelta(posShop.delta)}</b> เป็นต้นแบบ<br>
+      • วิเคราะห์ความแตกต่างด้าน QTY, ASP และ Sales Execution ระหว่าง Shop แล้วถ่ายทอด Best Practice<br>
+      • ตั้งเป้าหมายราย Shop เพื่อเพิ่ม QTY โดยไม่ลด ASP ต่ำกว่าระดับที่กำหนด
+    ` : `
+      • คัดเลือก Shop ที่มี Demand แต่ Contribution ยังต่ำเพื่อสร้างโอกาสเพิ่มยอดขายของ <b>${esc(focusName)}</b><br>
+      • จัดลำดับโอกาสตาม QTY, ASP และศักยภาพ Conversion ของแต่ละ Shop
     `;
     fixText = negShop ? `
-      • เร่งแก้ไขที่ <b>${esc(negShop.shop)}</b> ซึ่งเป็น Negative Shop Driver <b>${fmtDelta(negShop.delta)}</b><br>
-      • ตรวจสอบ QTY, Stock Availability, Traffic/Conversion และรูปแบบการนำเสนอสินค้าในร้าน<br>
-      • กำหนด Action รายร้านและติดตาม Recovery เทียบ MOM
+      • เร่งแก้ไข <b>${esc(negShop.shop)}</b> ซึ่งเป็น Negative Shop Driver <b>${fmtDelta(negShop.delta)}</b><br>
+      • ตรวจสอบ QTY, Stock Availability, Traffic/Conversion และ Sales Execution เพื่อระบุ Root Cause<br>
+      • จัดทำ Recovery Plan ราย Shop และติดตามผลเทียบ MOM จนกลับมาเป็นบวก
     ` : `
-      • ตรวจสอบ Shop ที่มี Contribution ต่ำหรือมีแนวโน้มลดลง แม้ Model โดยรวมยังเติบโต<br>
-      • แยกสาเหตุเป็น QTY, ASP และ Execution เพื่อกำหนด Action ให้ตรงจุด
+      • ยังไม่พบ Negative Shop ที่มีนัยสำคัญ แต่ให้ตรวจสอบ Shop ที่ MOM ชะลอตัวหรือ QTY ลดลง<br>
+      • ป้องกันการกระจุกตัวของยอดขายใน Shop ใด Shop หนึ่งมากเกินไป
     `;
     resourceText = `
-      • จัดสรร Stock และกำลังขายไปยัง Shop ที่มี Demand สูงสำหรับ <b>${esc(focusName)}</b><br>
-      • หาก QTY เป็นตัวขับเคลื่อนหลัก ให้เพิ่ม Availability และ Conversion; หาก ASP เป็นตัวขับเคลื่อนหลัก ให้เน้น Mix ของรุ่นมูลค่าสูง<br>
-      • จัดลำดับความสำคัญตาม Contribution ต่อ MOM เพื่อใช้ทรัพยากรอย่างมีประสิทธิภาพ
+      • จัดสรร Stock และกำลังขายไปยัง Shop ที่มี <b>Contribution ต่อ MOM สูง</b> สำหรับ <b>${esc(focusName)}</b><br>
+      • เพิ่มทรัพยากรใน Shop ที่มี Demand สูงแต่ Availability หรือ Conversion ยังต่ำ<br>
+      • ใช้ Shop Growth Driver เป็น Benchmark ก่อนขยาย Action ไปยัง Shop อื่น
     `;
     monitorText = `
-      • ติดตาม <b>${esc(focusName)}</b> ในระดับ Shop แบบรายสัปดาห์<br>
-      • Monitor <b>Net Amount / QTY / ASP / MOM</b> และ Contribution ของแต่ละ Shop<br>
-      • ประเมินผล Action ในเดือนถัดไป และปรับกลยุทธ์ทันทีหาก Growth Driver เปลี่ยน
+      • ติดตาม <b>${esc(focusName)}</b> ราย Shop ด้วย Net Amount / QTY / ASP / MOM<br>
+      • Review Top 3 Growth Shop และ Top 3 Negative Shop ทุกสัปดาห์ พร้อมระบุ Owner ของแต่ละ Action<br>
+      • ประเมินผลในเดือนถัดไป และปรับ Stock / Promotion / Sales Execution ตาม Driver ที่เปลี่ยนแปลง
     `;
+
   } else if(level==='brand'){
-    maintainText = topBrandPos ? `
-      • รักษา <b>${esc(focusName)}</b> ซึ่งเป็น Brand ที่สร้างการเติบโตสูงสุด <b>${fmtDelta(topBrandPos.delta)}</b><br>
-      • ต่อยอด Model ที่เป็น Growth Driver และรักษา Shop ที่สร้าง Contribution สูง<br>
-      • ใช้ Mix ของ Model และ ASP เป็นตัวควบคุมคุณภาพของการเติบโต
-    ` : `
-      • รักษาฐานยอดขายของ <b>${esc(focusName)}</b> และติดตามการเปลี่ยนแปลงราย Model อย่างใกล้ชิด<br>
-      • ป้องกันการสูญเสียยอดขายจาก Model หรือ Shop ที่เริ่มชะลอตัว
+    const posModel = topModelPos;
+    const negModel = topModelNeg;
+    const posShop = topShopPos;
+    const negShop = topShopNeg;
+    maintainText = `
+      • รักษา <b>${esc(focusName)}</b> ซึ่งมียอดขายสุทธิ <b>${money(a.a)}</b> และ Contribution ต่อ MOM <b>${fmtDelta(focusDelta)}</b><br>
+      • รักษา Model Growth Driver ${posModel?`<b>${esc(posModel.model)}</b> <b>${fmtDelta(posModel.delta)}</b>`:'ที่มี Contribution เป็นบวก'} และ Shop ที่รองรับ Demand ได้ดี<br>
+      • บริหาร Product Mix และ ASP เพื่อให้การเติบโตของ Brand มีทั้งปริมาณและมูลค่าที่เหมาะสม
     `;
-    growText = `
-      • ขยาย Model ที่มี <b>Δ MOM เป็นบวก</b> และมีศักยภาพเพิ่ม Contribution ให้ <b>${esc(focusName)}</b><br>
-      • ขยายไปยัง Shop ที่มี Demand แต่ Contribution ยังต่ำ พร้อมนำ Best Practice จาก Shop Growth Driver ไปใช้<br>
-      • กำหนดเป้าหมายราย Model และราย Shop เพื่อให้สามารถวัดผลของ Action ได้ชัดเจน
-    `;
-    fixText = negDriver ? `
-      • เร่งแก้ไข <b>${esc(negDriver.model)}</b> ซึ่งเป็น Negative Model Driver <b>${fmtDelta(negDriver.delta)}</b><br>
-      • ตรวจสอบ QTY, ASP, Availability และ Sales Execution เพื่อแยกสาเหตุที่แท้จริง<br>
-      • จัดทำ Recovery Plan เฉพาะ Model และติดตามผลเป็นรายสัปดาห์
+    growText = posModel ? `
+      • เร่งขยาย <b>${esc(posModel.model)}</b> ซึ่งเป็น Model ที่สร้าง Contribution สูงสุดภายใน <b>${esc(focusName)}</b> <b>${fmtDelta(posModel.delta)}</b><br>
+      • ขยายไปยัง Shop ที่มี Demand แต่ Contribution ยังต่ำ โดยใช้ Shop Growth Driver เป็นต้นแบบ<br>
+      • กำหนดเป้าหมายราย Model และราย Shop เพื่อให้สามารถวัดผลของ Action ได้โดยตรง
     ` : `
-      • ตรวจสอบ Model ที่มีการชะลอตัวหรือ Contribution ต่ำภายใน <b>${esc(focusName)}</b><br>
-      • ป้องกันไม่ให้ Negative Driver ขยายตัวจนกระทบ Brand ในเดือนถัดไป
+      • คัดเลือก Model ที่มี Demand และศักยภาพเพิ่ม Contribution ให้ <b>${esc(focusName)}</b><br>
+      • จัดลำดับโอกาสตาม QTY, ASP และ Contribution ต่อ MOM
+    `;
+    fixText = negModel ? `
+      • เร่งแก้ไข <b>${esc(negModel.model)}</b> ซึ่งเป็น Negative Model Driver <b>${fmtDelta(negModel.delta)}</b><br>
+      • ตรวจสอบต่อเนื่องถึง Shop เพื่อแยกว่าเกิดจาก QTY, ASP, Availability หรือ Sales Execution<br>
+      • กำหนด Recovery Plan เฉพาะ Model และ Shop ที่เป็นต้นเหตุ พร้อมกำหนด Deadline
+    ` : negShop ? `
+      • แม้ Model โดยรวมยังไม่เป็นลบ แต่มี <b>${esc(negShop.shop)}</b> เป็น Negative Shop Driver <b>${fmtDelta(negShop.delta)}</b><br>
+      • ตรวจสอบสาเหตุราย Shop และแก้ไขจุดที่ทำให้ยอดขายของ Brand สูญเสีย Momentum
+    ` : `
+      • ยังไม่พบ Negative Driver ที่มีนัยสำคัญ ให้เฝ้าระวัง Model และ Shop ที่เริ่มชะลอตัว
     `;
     resourceText = `
       • จัดลำดับทรัพยากรไปยัง Model ที่มี Contribution ต่อ MOM สูงสุดภายใน <b>${esc(focusName)}</b><br>
-      • หาก <b>${esc(driverName)}</b> เป็นปัจจัยหลัก ให้จัดทรัพยากรให้ตรงกับสาเหตุ ไม่ใช้มาตรการเดียวกับทุก Model<br>
-      • กระจาย Best Practice จาก Shop ที่เติบโตไปยัง Shop ที่มีศักยภาพ
+      • เพิ่ม Stock / Sales Effort ใน Shop ที่มี Demand สูง และใช้ Best Practice จาก Shop ที่เติบโตเป็นต้นแบบ<br>
+      • จัดสรรงบประมาณตาม Root Cause ของแต่ละ Model ไม่ใช้มาตรการเดียวกับทุกสินค้า
     `;
     monitorText = `
-      • ติดตาม Brand → Model → Shop เพื่อให้เห็นการเปลี่ยนแปลงของ Driver แบบครบลำดับชั้น<br>
-      • Monitor Net Amount, QTY, ASP และ Δ MOM ของ Growth / Negative Driver<br>
-      • ทบทวน Action ทุกเดือน และยกระดับประเด็นที่ Negative Driver ต่อเนื่อง
+      • ติดตาม <b>${esc(focusName)} → Model → Shop</b> เพื่อเชื่อมโยงผลของ Action กับยอดขายจริง<br>
+      • Review Net Amount / QTY / ASP / MOM และ Contribution ของ Growth / Negative Driver ทุกเดือน<br>
+      • หาก Negative Driver ต่อเนื่อง ให้ยกระดับเป็นประเด็นบริหารและกำหนด Recovery Target รอบถัดไป
     `;
-  } else {
+
+  } else if(level==='product'){
+    const posBrand = topBrandPos;
+    const negBrand = topBrandNeg;
+    const posModel = topModelPos;
+    const negModel = topModelNeg;
+    const posShop = topShopPos;
+    const negShop = topShopNeg;
     maintainText = `
-      • รักษา Growth Driver หลัก <b>${posDriver?esc(posDriver.model):'—'}</b> ซึ่งสร้าง Contribution <b>${posDriver?fmtDelta(posDriver.delta):'—'}</b><br>
-      • รักษา Brand ที่มี Contribution เป็นบวก และขยาย Best Practice ไปยังพื้นที่ที่ยังมีช่องว่าง<br>
-      • ควบคุมทั้ง QTY และ ASP เพื่อให้การเติบโตมีคุณภาพและต่อเนื่อง
+      • รักษา <b>${esc(focusName)}</b> ที่มียอดขายสุทธิ <b>${money(a.a)}</b>, QTY <b>${num(a.q)}</b> และ MOM <b>${mom===null?'—':(mom>=0?'+':'')+pct(mom)}</b><br>
+      • รักษา Brand Growth Driver ${posBrand?`<b>${esc(posBrand.brand)}</b> <b>${fmtDelta(posBrand.delta)}</b>`:'ที่มี Contribution เป็นบวก'} และ Model ที่สร้างยอดขายหลัก<br>
+      • ควบคุมทั้ง QTY และ ASP เพื่อให้การเติบโตของ Product มีคุณภาพและต่อเนื่อง
     `;
-    growText = posShop ? `
-      • ขยายโอกาสใน <b>${esc(posShop.shop)}</b> ซึ่งสร้าง Contribution สูงสุด <b>${fmtDelta(posShop.delta)}</b><br>
-      • เจาะ Brand / Model ที่มี Demand สูงและเพิ่ม Conversion ใน Shop ศักยภาพ<br>
-      • ใช้ Growth Driver เป็นต้นแบบเพื่อยกระดับ Shop ที่มี Contribution ต่ำ
+    growText = posModel ? `
+      • เร่งขยาย <b>${esc(posModel.model)}</b> ซึ่งเป็น Model Growth Driver <b>${fmtDelta(posModel.delta)}</b> ภายใน <b>${esc(focusName)}</b><br>
+      • ขยายไปยัง Shop ที่มี Demand สูง เช่น <b>${posShop?esc(posShop.shop):'Shop Growth Driver'}</b> และถ่ายทอด Best Practice<br>
+      • กำหนดเป้าหมาย QTY / Conversion / Availability รายสัปดาห์เพื่อเร่ง Contribution
     ` : `
-      • คัดเลือก Brand, Model และ Shop ที่มีศักยภาพเพื่อสร้างการเติบโตเพิ่มเติม<br>
-      • จัดลำดับโอกาสตาม Contribution ต่อ MOM และความสามารถในการขยายยอดขาย
+      • คัดเลือก Brand / Model / Shop ที่มีศักยภาพเพิ่มยอดขาย และจัดลำดับตาม Contribution ต่อ MOM
     `;
-    fixText = negDriver ? `
-      • เร่งแก้ไข <b>${esc(negDriver.model)}</b> ซึ่งหักล้างการเติบโต <b>${fmtDelta(negDriver.delta)}</b><br>
-      • ตรวจสอบต่อเนื่องลงไปถึง Brand → Model → Shop เพื่อระบุจุดที่ทำให้ยอดขายลดลง<br>
-      • กำหนด Recovery Plan ตามสาเหตุจริง ได้แก่ QTY / ASP / Availability / Sales Execution
+    fixText = negModel ? `
+      • เร่งแก้ <b>${esc(negModel.model)}</b> ซึ่งหักล้างการเติบโต <b>${fmtDelta(negModel.delta)}</b><br>
+      • เจาะต่อไปถึง Brand และ Shop เพื่อระบุ Root Cause ที่แท้จริงก่อนกำหนด Recovery Plan<br>
+      • ตรวจสอบ QTY / ASP / Availability / Sales Execution และติดตามผลจนกลับมาเป็นบวก
+    ` : negBrand ? `
+      • เฝ้าระวัง <b>${esc(negBrand.brand)}</b> ซึ่งเป็น Negative Brand Driver <b>${fmtDelta(negBrand.delta)}</b><br>
+      • แตกข้อมูลลง Model → Shop เพื่อระบุจุดที่ต้องแก้ไขอย่างเฉพาะเจาะจง
     ` : `
-      • ติดตาม Negative Driver ราย Brand / Model / Shop เพื่อป้องกันการกลับทิศของ Momentum
+      • ยังไม่พบ Negative Driver ที่มีนัยสำคัญ ให้รักษา Momentum และเฝ้าระวังการเปลี่ยนทิศของ Driver
+    `;
+    resourceText = `
+      • จัดสรร Stock / Sales Effort / Promotion ไปยัง Brand, Model และ Shop ที่สร้าง Contribution สูงสุด<br>
+      • หาก QTY เป็นปัจจัยหลัก ให้เพิ่ม Availability / Conversion; หาก ASP เป็นปัจจัยหลัก ให้เน้น Product Mix รุ่นมูลค่าสูง<br>
+      • ทบทวนทรัพยากรตามลำดับ <b>Brand → Model → Shop</b> เพื่อให้การลงทุนตรงจุด
+    `;
+    monitorText = `
+      • ติดตาม <b>${esc(focusName)} → Brand → Model → Shop</b> ด้วย Net Amount / QTY / ASP / MOM<br>
+      • Review Growth Driver และ Negative Driver ทุกเดือน พร้อมระบุ Owner และ Deadline ของ Action<br>
+      • ใช้ผลเดือนปัจจุบันเป็น Input สำหรับกำหนดเป้าหมายและ Action ของเดือนถัดไป
+    `;
+
+  } else {
+    // Overall BMA I view.
+    maintainText = `
+      • รักษา Growth Driver หลัก <b>${topModelPos?esc(topModelPos.model):'—'}</b> ซึ่งสร้าง Contribution <b>${topModelPos?fmtDelta(topModelPos.delta):'—'}</b><br>
+      • รักษา Brand ที่มี Contribution เป็นบวก และขยาย Best Practice จาก Shop ที่เติบโตไปยังพื้นที่ที่ยังมีศักยภาพ<br>
+      • ควบคุม QTY และ ASP ควบคู่กัน เพื่อให้ยอดขายเติบโตอย่างมีคุณภาพ
+    `;
+    growText = topShopPos ? `
+      • ขยายโอกาสใน <b>${esc(topShopPos.shop)}</b> ซึ่งสร้าง Shop Contribution สูงสุด <b>${fmtDelta(topShopPos.delta)}</b><br>
+      • เร่ง Model ที่มี Demand สูงและเพิ่ม Conversion / Availability ใน Shop ศักยภาพ<br>
+      • ใช้ Growth Driver เป็น Benchmark เพื่อยกระดับ Shop ที่มี Contribution ต่ำ
+    ` : `
+      • คัดเลือก Brand / Model / Shop ที่มีศักยภาพเพิ่มยอดขาย และจัดลำดับตาม Contribution ต่อ MOM
+    `;
+    fixText = topModelNeg ? `
+      • เร่งแก้ <b>${esc(topModelNeg.model)}</b> ซึ่งเป็น Negative Model Driver <b>${fmtDelta(topModelNeg.delta)}</b><br>
+      • เจาะต่อเนื่อง Brand → Model → Shop เพื่อระบุจุดที่ทำให้ยอดขายลดลง<br>
+      • กำหนด Recovery Plan ตาม Root Cause ได้แก่ QTY / ASP / Availability / Sales Execution
+    ` : `
+      • ยังไม่พบ Negative Model Driver ที่มีนัยสำคัญ ให้ติดตามจุดที่เริ่มชะลอตัว
     `;
     resourceText = `
       • ปัจจัยหลักของการเปลี่ยนแปลงคือ <b>${esc(driverName)}</b> ที่มีผลกระทบ <b>${driverValue}</b><br>
-      • จัดสรร Stock, กำลังขาย และกิจกรรมส่งเสริมการขายไปยังจุดที่สร้าง Contribution สูงสุด<br>
-      • ทบทวนทรัพยากรตาม Brand → Model → Shop เพื่อให้การลงทุนตรงจุด
+      • จัดสรร Stock / กำลังขาย / Promotion ไปยัง Brand, Model และ Shop ที่สร้าง Contribution สูงสุด<br>
+      • ทบทวนทรัพยากรตามลำดับ <b>Brand → Model → Shop</b> เพื่อให้การลงทุนตรงจุด
     `;
     monitorText = `
       • ติดตาม <b>Net Amount / QTY / ASP / MOM</b> ในทุกระดับของ Drill-down<br>
-      • ตรวจสอบ Growth Driver และ Negative Driver ทุกเดือน พร้อมระบุผู้รับผิดชอบ<br>
+      • Review Growth Driver และ Negative Driver ทุกเดือน พร้อมระบุ Owner และ Deadline ของ Action<br>
       • ใช้ผลเดือนปัจจุบันเป็น Input สำหรับกำหนด Action และเป้าหมายเดือนถัดไป
     `;
   }
