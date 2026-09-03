@@ -1173,3 +1173,652 @@ body{
   }
 
 }
+/* =========================================================
+   W&W EXECUTIVE DASHBOARD
+   THEME V3 — NAVY / ROYAL BLUE PREMIUM
+   ========================================================= */
+
+:root{
+  --navy:#031B52;
+  --navy2:#062B78;
+  --royal:#0A45C5;
+  --blue:#087FDB;
+  --cyan:#22A8F0;
+  --lightblue:#EAF3FF;
+  --ice:#F3F7FC;
+  --white:#FFFFFF;
+  --text:#102E59;
+  --muted:#7185A0;
+  --line:#D8E3F0;
+  --red:#E34B57;
+  --green:#15966E;
+}
+
+/* =========================================================
+   PAGE BACKGROUND
+   ========================================================= */
+
+body{
+  background:
+    radial-gradient(
+      circle at 90% 0%,
+      rgba(24,139,235,.08),
+      transparent 28%
+    ),
+    linear-gradient(
+      180deg,
+      #EEF4FA 0%,
+      #F7FAFD 48%,
+      #EEF4FA 100%
+    );
+}
+
+
+/* =========================================================
+   HEADER — DEEP BLUE EXECUTIVE
+   ========================================================= */
+
+.topbar{
+  position:relative;
+  min-height:108px;
+  padding:20px 30px;
+
+  background:
+    linear-gradient(
+      110deg,
+      #03164A 0%,
+      #062B78 48%,
+      #075BB1 78%,
+      #0789C9 100%
+    );
+
+  border-radius:0 0 18px 18px;
+
+  box-shadow:
+    0 10px 28px rgba(3,27,82,.28);
+
+  overflow:hidden;
+}
+
+/* abstract rising chart background */
+.topbar::before{
+  content:"";
+  position:absolute;
+  right:0;
+  bottom:0;
+
+  width:46%;
+  height:100%;
+
+  opacity:.32;
+
+  background:
+    linear-gradient(
+      135deg,
+      transparent 48%,
+      rgba(255,255,255,.65) 49%,
+      rgba(255,255,255,.65) 50%,
+      transparent 51%
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 34px,
+      rgba(255,255,255,.10) 35px 36px
+    );
+
+  clip-path:polygon(
+    34% 100%,
+    48% 45%,
+    54% 52%,
+    65% 25%,
+    72% 36%,
+    84% 10%,
+    100% 0,
+    100% 100%
+  );
+}
+
+/* diagonal highlight */
+.topbar::after{
+  content:"";
+  position:absolute;
+
+  right:8%;
+  top:-40px;
+
+  width:5px;
+  height:190px;
+
+  background:
+    linear-gradient(
+      180deg,
+      transparent,
+      rgba(255,255,255,.95),
+      transparent
+    );
+
+  transform:rotate(24deg);
+
+  opacity:.8;
+}
+
+.topbar > *{
+  position:relative;
+  z-index:2;
+}
+
+.eyebrow{
+  color:#B9E8FF;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:2px;
+}
+
+.topbar h1{
+  color:#FFFFFF;
+  font-size:27px;
+  font-weight:900;
+  letter-spacing:-.5px;
+}
+
+#subtitle{
+  color:#D7EAFE;
+  font-size:11px;
+}
+
+.brand{
+  color:#FFFFFF;
+  font-size:14px;
+  font-weight:900;
+  letter-spacing:1.7px;
+}
+
+
+/* =========================================================
+   FILTER BAR
+   ========================================================= */
+
+.filters{
+  margin-top:14px;
+
+  background:#FFFFFF;
+
+  border:1px solid #D5E1ED;
+  border-radius:13px;
+
+  box-shadow:
+    0 5px 18px rgba(16,46,89,.08);
+}
+
+.filter label{
+  color:#526C8A;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.9px;
+}
+
+.filter select{
+  height:38px;
+
+  background:#FFFFFF;
+
+  border:1px solid #C8D8E8;
+  border-radius:7px;
+
+  color:#163D69;
+
+  font-size:12px;
+  font-weight:600;
+}
+
+.filter select:focus{
+  border-color:#0A68C9;
+
+  box-shadow:
+    0 0 0 3px rgba(10,104,201,.12);
+}
+
+#resetBtn{
+  height:38px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #062B78,
+      #0A68C9
+    );
+
+  border-radius:7px;
+
+  box-shadow:
+    0 4px 10px rgba(6,43,120,.22);
+}
+
+
+/* =========================================================
+   KPI CARDS
+   ========================================================= */
+
+.hero-grid{
+  gap:12px;
+}
+
+.kpi{
+  position:relative;
+
+  min-height:112px;
+
+  background:#FFFFFF;
+
+  border:1px solid #D5E1ED;
+  border-top:4px solid #0A45C5;
+
+  border-radius:12px;
+
+  box-shadow:
+    0 5px 16px rgba(16,46,89,.08);
+
+  overflow:hidden;
+}
+
+.kpi::after{
+  content:"";
+
+  position:absolute;
+  right:-22px;
+  bottom:-35px;
+
+  width:90px;
+  height:90px;
+
+  border-radius:50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(10,69,197,.07),
+      transparent 68%
+    );
+}
+
+.kpi.amount{
+  border-top-color:#087FDB;
+}
+
+.kpi.volume{
+  border-top-color:#15966E;
+}
+
+.kpi span{
+  position:relative;
+  z-index:2;
+
+  color:#7185A0;
+
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:1px;
+}
+
+.kpi strong{
+  position:relative;
+  z-index:2;
+
+  color:#092F63;
+
+  font-size:27px;
+  font-weight:900;
+}
+
+.kpi small{
+  position:relative;
+  z-index:2;
+
+  color:#7185A0;
+
+  font-size:10px;
+}
+
+.kpi small b{
+  color:#123C69;
+  font-weight:900;
+}
+
+
+/* =========================================================
+   EXECUTIVE INSIGHT — BLUE MANAGEMENT STRIP
+   ========================================================= */
+
+.insight{
+  position:relative;
+
+  min-height:62px;
+
+  display:flex;
+  align-items:center;
+  gap:18px;
+
+  padding:12px 20px;
+
+  background:
+    linear-gradient(
+      105deg,
+      #031B52 0%,
+      #06378A 58%,
+      #075EA8 100%
+    );
+
+  border:0;
+  border-left:5px solid #23A9F0;
+
+  border-radius:11px;
+
+  box-shadow:
+    0 7px 20px rgba(3,27,82,.18);
+
+  overflow:hidden;
+}
+
+.insight::after{
+  content:"";
+
+  position:absolute;
+  right:-30px;
+  top:-80px;
+
+  width:180px;
+  height:180px;
+
+  border-radius:50%;
+
+  border:1px solid rgba(255,255,255,.12);
+
+  box-shadow:
+    0 0 0 22px rgba(255,255,255,.025),
+    0 0 0 44px rgba(255,255,255,.018);
+}
+
+.section-title{
+  position:relative;
+  z-index:2;
+
+  color:#6DD2FF;
+
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:1.1px;
+}
+
+.insight #insightText{
+  position:relative;
+  z-index:2;
+
+  color:#FFFFFF;
+
+  font-size:12px;
+}
+
+
+/* =========================================================
+   CHART CARDS
+   ========================================================= */
+
+.two-col{
+  gap:12px;
+}
+
+.card{
+  background:#FFFFFF;
+
+  border:1px solid #D4E1ED;
+
+  border-radius:13px;
+
+  box-shadow:
+    0 5px 17px rgba(16,46,89,.075);
+
+  overflow:hidden;
+}
+
+.card-head{
+  min-height:55px;
+
+  padding:14px 17px 11px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #FFFFFF,
+      #F9FBFD
+    );
+
+  border-bottom:1px solid #DCE6EF;
+}
+
+.card-head h2{
+  color:#092F63;
+
+  font-size:15px;
+  font-weight:900;
+}
+
+.card-head span{
+  color:#7388A0;
+  font-size:9px;
+}
+
+
+/* =========================================================
+   CHART
+   ========================================================= */
+
+.chart{
+  background:#FFFFFF;
+}
+
+.chart svg{
+  font-family:
+    "Noto Sans Thai",
+    "Prompt",
+    Arial,
+    sans-serif;
+}
+
+
+/* =========================================================
+   TABLE HEADER
+   ========================================================= */
+
+.data-table thead th{
+  background:
+    linear-gradient(
+      180deg,
+      #0A347C,
+      #062B68
+    );
+
+  color:#FFFFFF;
+
+  border-bottom:0;
+
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.45px;
+}
+
+.data-table tbody td{
+  color:#2B4D70;
+
+  border-bottom:1px solid #E7EEF5;
+}
+
+.data-table tbody td:first-child{
+  color:#123D69;
+  font-weight:800;
+}
+
+.data-table tbody tr:hover td{
+  background:#F1F7FD;
+}
+
+
+/* =========================================================
+   POSITIVE / NEGATIVE
+   ========================================================= */
+
+.data-table .good{
+  color:#15966E;
+  font-weight:900;
+}
+
+.data-table .warning{
+  color:#D78A1D;
+  font-weight:900;
+}
+
+.data-table .critical{
+  color:#DF4C56;
+  font-weight:900;
+}
+
+
+/* =========================================================
+   KEY MESSAGE / FOCUS ACTION
+   ========================================================= */
+
+.action-grid{
+  gap:12px;
+}
+
+.action-card{
+  position:relative;
+
+  min-height:100px;
+
+  padding:17px 20px;
+
+  background:
+    linear-gradient(
+      110deg,
+      #031B52,
+      #07388B 70%,
+      #075EA8
+    );
+
+  border:0;
+  border-radius:12px;
+
+  box-shadow:
+    0 7px 20px rgba(3,27,82,.17);
+
+  overflow:hidden;
+}
+
+.action-card::after{
+  content:"";
+
+  position:absolute;
+
+  right:-35px;
+  bottom:-55px;
+
+  width:160px;
+  height:160px;
+
+  border-radius:50%;
+
+  border:1px solid rgba(255,255,255,.12);
+
+  box-shadow:
+    0 0 0 25px rgba(255,255,255,.025),
+    0 0 0 50px rgba(255,255,255,.018);
+}
+
+.action-card .section-title{
+  color:#67D0FF;
+}
+
+#keyMessage,
+#actionMessage{
+  position:relative;
+  z-index:2;
+
+  color:#FFFFFF;
+
+  font-size:12px;
+  line-height:1.6;
+}
+
+
+/* =========================================================
+   LINKS
+   ========================================================= */
+
+a{
+  color:#086ACB;
+  font-weight:700;
+}
+
+a:hover{
+  color:#031B52;
+}
+
+
+/* =========================================================
+   PREMIUM SCROLLBAR
+   ========================================================= */
+
+::-webkit-scrollbar{
+  width:7px;
+  height:7px;
+}
+
+::-webkit-scrollbar-track{
+  background:#EAF0F6;
+}
+
+::-webkit-scrollbar-thumb{
+  background:#8BA8C3;
+  border-radius:10px;
+}
+
+::-webkit-scrollbar-thumb:hover{
+  background:#4D79A2;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media(max-width:1200px){
+
+  .hero-grid{
+    grid-template-columns:repeat(3,1fr);
+  }
+
+}
+
+@media(max-width:900px){
+
+  .two-col{
+    grid-template-columns:1fr;
+  }
+
+  .topbar h1{
+    font-size:23px;
+  }
+
+}
+
+@media(max-width:600px){
+
+  .hero-grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .brand{
+    display:none;
+  }
+
+}
