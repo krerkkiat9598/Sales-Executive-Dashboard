@@ -763,3 +763,413 @@ a:hover{
   }
 
 }
+/* =========================================================
+   W&W EXECUTIVE DASHBOARD — THEME V2
+   Premium Management Dashboard
+   ========================================================= */
+
+/* ---------- Page ---------- */
+
+body{
+  background:
+    linear-gradient(
+      180deg,
+      #EEF4F8 0%,
+      #F5F8FA 55%,
+      #EEF4F8 100%
+    );
+}
+
+.app{
+  max-width:1600px;
+  padding:10px 18px 36px;
+}
+
+
+/* ---------- Header ---------- */
+
+.topbar{
+  min-height:88px;
+  padding:17px 28px;
+
+  background:
+    linear-gradient(
+      115deg,
+      #103F67 0%,
+      #075D8B 52%,
+      #0C82B2 100%
+    );
+
+  border-radius:0 0 18px 18px;
+
+  box-shadow:
+    0 8px 24px rgba(15,63,96,.20);
+}
+
+.eyebrow{
+  font-size:10px;
+  letter-spacing:2px;
+  color:#D8EDF8;
+}
+
+.topbar h1{
+  font-size:25px;
+  letter-spacing:-.4px;
+}
+
+#subtitle{
+  font-size:11px;
+  margin-top:4px;
+  color:#D8EAF4;
+}
+
+.brand{
+  font-size:13px;
+  letter-spacing:1.5px;
+}
+
+
+/* ---------- Filter ---------- */
+
+.filters{
+  margin-top:14px;
+  margin-bottom:14px;
+
+  padding:12px 14px;
+
+  background:#FFFFFF;
+
+  border:1px solid #D6E2EA;
+  border-radius:13px;
+
+  box-shadow:
+    0 3px 12px rgba(22,65,94,.07);
+}
+
+.filter label{
+  font-size:9px;
+  letter-spacing:.8px;
+  color:#637B90;
+}
+
+.filter select{
+  height:37px;
+
+  border-color:#C7D8E4;
+  border-radius:7px;
+
+  font-size:12px;
+  color:#244A68;
+}
+
+#resetBtn{
+  height:37px;
+  border-radius:7px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #075F8D,
+      #087CAA
+    );
+
+  font-size:11px;
+}
+
+
+/* ---------- KPI Area ---------- */
+
+.hero-grid{
+  gap:11px;
+}
+
+.kpi{
+  min-height:106px;
+
+  padding:14px 15px 12px;
+
+  background:#FFFFFF;
+
+  border:1px solid #D7E3EB;
+  border-top:3px solid #A8BDCC;
+
+  border-radius:12px;
+
+  box-shadow:
+    0 4px 13px rgba(18,63,95,.07);
+}
+
+.kpi:hover{
+  transform:translateY(-1px);
+
+  box-shadow:
+    0 7px 18px rgba(18,63,95,.11);
+}
+
+.kpi.amount{
+  border-top-color:#087DB5;
+}
+
+.kpi.volume{
+  border-top-color:#29957F;
+}
+
+.kpi span{
+  margin-bottom:5px;
+
+  font-size:9px;
+  letter-spacing:1px;
+
+  color:#70869A;
+}
+
+.kpi strong{
+  font-size:26px;
+
+  color:#173F61;
+}
+
+.kpi small{
+  font-size:10px;
+  color:#708397;
+}
+
+.kpi small b{
+  color:#193F5D;
+}
+
+
+/* ---------- Executive Insight ---------- */
+
+.insight{
+  padding:13px 19px;
+
+  border:1px solid #D7E3EB;
+  border-left:5px solid #087DB5;
+
+  border-radius:12px;
+
+  box-shadow:
+    0 4px 13px rgba(18,63,95,.06);
+
+  background:#FFFFFF;
+}
+
+.section-title{
+  margin-bottom:4px;
+
+  font-size:9px;
+  letter-spacing:1.1px;
+  color:#0077B5;
+}
+
+#insightText{
+  font-size:12px;
+  color:#294863;
+}
+
+
+/* ---------- Main Cards ---------- */
+
+.two-col{
+  gap:11px;
+}
+
+.card{
+  border:1px solid #D6E2EA;
+  border-radius:13px;
+
+  box-shadow:
+    0 4px 14px rgba(18,63,95,.07);
+
+  background:#FFFFFF;
+}
+
+.card-head{
+  min-height:54px;
+
+  padding:14px 16px 10px;
+
+  border-bottom:1px solid #E2EAF0;
+}
+
+.card-head h2{
+  font-size:15px;
+  color:#173F61;
+}
+
+.card-head span{
+  font-size:9px;
+  color:#72879A;
+}
+
+
+/* ---------- Chart Area ---------- */
+
+.chart{
+  background:#FFFFFF;
+}
+
+/* preserve current SVG chart */
+.chart svg{
+  font-family:
+    "Noto Sans Thai",
+    "Prompt",
+    Arial,
+    sans-serif;
+}
+
+/* subtle chart separation */
+#trendChart,
+#volumeChart{
+  position:relative;
+}
+
+
+/* ---------- Insight Strip under Chart ---------- */
+
+.exec-insight{
+  border-radius:11px !important;
+
+  background:
+    linear-gradient(
+      90deg,
+      #EEF6FC,
+      #F5F9FC
+    ) !important;
+
+  border-left:4px solid #087DB5 !important;
+
+  box-shadow:none !important;
+}
+
+.exec-insight strong{
+  color:#173F61 !important;
+}
+
+
+/* ---------- Product / Area / Shop Cards ---------- */
+
+.card h3{
+  color:#173F61;
+}
+
+.tablewrap{
+  border-radius:10px;
+}
+
+.data-table{
+  font-size:11px;
+}
+
+.data-table thead th{
+  padding:9px 11px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #F3F7FA,
+      #EDF3F7
+    );
+
+  color:#5D7489;
+
+  font-size:9px;
+  letter-spacing:.5px;
+}
+
+.data-table tbody td{
+  padding:8px 11px;
+
+  color:#31506A;
+}
+
+.data-table tbody tr:hover td{
+  background:#F4F9FC;
+}
+
+
+/* ---------- Management Message ---------- */
+
+.action-grid{
+  gap:11px;
+}
+
+.action-card{
+  padding:15px 17px;
+
+  border:1px solid #D6E2EA;
+  border-radius:12px;
+
+  box-shadow:
+    0 4px 13px rgba(18,63,95,.06);
+
+  background:#FFFFFF;
+}
+
+.action-card:first-child{
+  border-left:4px solid #087DB5;
+}
+
+.action-card:last-child{
+  border-left:4px solid #29957F;
+}
+
+
+/* ---------- Status ---------- */
+
+#kStatus{
+  letter-spacing:.2px;
+}
+
+
+/* ---------- Scroll ---------- */
+
+::-webkit-scrollbar{
+  width:7px;
+  height:7px;
+}
+
+::-webkit-scrollbar-track{
+  background:#EDF3F7;
+}
+
+::-webkit-scrollbar-thumb{
+  background:#B5C9D7;
+  border-radius:10px;
+}
+
+
+/* ---------- Responsive ---------- */
+
+@media(max-width:1200px){
+
+  .hero-grid{
+    grid-template-columns:repeat(3,1fr);
+  }
+
+}
+
+@media(max-width:900px){
+
+  .topbar{
+    padding:16px 20px;
+  }
+
+  .topbar h1{
+    font-size:22px;
+  }
+
+}
+
+@media(max-width:600px){
+
+  .app{
+    padding:6px;
+  }
+
+  .hero-grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+}
