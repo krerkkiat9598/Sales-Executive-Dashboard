@@ -286,74 +286,352 @@ function monthly(rows){
 }
 
 function renderTrend(rows){
-
   const selectedMonth = $("fMonth").value;
 
-  let trendRows = DATA.filter(r=>{
-    const checks=[
-      ["fYear",r.YEAR],
-      ["fRegion",r.AREA_GROUP],
-      ["fArea",r.AREA],
-      ["fChannel",r.CHANNEL],
-      ["fProduct",r.PRODUCT],
-      ["fShop",r.SHOP_NAME]
-    ];
+  const by = {};
+  rows.forEach(r=>{
+    const k = `${r.YEAR}-${String(r.MONTH).padStart(2,"0")}`;
 
-    return checks.every(([id,val])=>
-      !$(id).value || String(val)===$(id).value
-    );
+    if(!by[k]){
+      by[k] = {a:0,t:0,q:0,tq:0};
+    }
+
+    by[k].a += +r.NET_AMOUNT || 0;
+    by[k].t += +r.TARGET_BOTTOMUP_NET_AMOUNT || 0;
+    by[k].q += +r.QTY || 0;
+    by[k].tq += +r.TARGET_BOTTOMUP_QTY || 0;
   });
 
-  if(!$("fYear").value)
-    trendRows=DATA.slice();
+  const data = Object.entries(by)
+    .sort()
+    .map(([k,v])=>({
+      month:k.slice(5),
+      ...v
+    }));
 
-  const d=monthly(trendRows);
+  if(!data.length){
+    $("trendChart").innerHTML = "";
+    $("volumeChart").innerHTML = "";
+    return;
+  }
 
-  const max=Math.max(
-    ...d.map(x=>x.a),
-    ...d.map(x=>x.t),
-    1
-  );
+  function buildChart(containerId, config){
 
-  $("trendChart").innerHTML=
-    `<div class="bars">${
-      d.map(x=>
-        `<div class="chartcol">
-          <div class="barwrap">
-            <div class="bar actual" style="height:${x.a/max*100}%"></div>
-            <div class="bar target" style="height:${x.t/max*100}%"></div>
+    const W = 760;
+    const H = 300;
+
+    const left = 55;
+    const right = 25;
+    const top = 38;
+    const bottom = 58;
+
+    const chartW = W-left-right;
+    const chartH = H-top-bottom;
+
+    const max = Math.max(
+      ...data.map(x=>x[config.actualKey]),
+      ...data.map(x=>x[config.targetKey]),
+      1
+    );
+
+    const gap = chartW / data.length;
+    const barW = Math.min(42,gap*0.55);
+
+    const y = v => top + chartH - (v/max)*chartH;
+
+    const selectedIndex =
+      data.findIndex(x=>String(x.month)===String(selectedMonth).padStart(2,"0"));
+
+    const bars = data.map((x,i)=>{
+
+      const cx = left + gap*i + gap/2;
+      const barX = cx-barW/2;
+
+      const actualY = y(x[config.actualKey]);
+      const actualH = top+chartH-actualY;
+
+      const selected = i===selectedIndex;
+
+      return `
+        ${selected ? `
+          <rect
+            x="${cx-gap/2}"
+            y="${top-12}"
+            width="${gap}"
+            height="${chartH+30}"
+            rx="10"
+            fill="#eaf4ff"/>
+        ` : ""}
+
+        <rect
+          x="${barX}"
+          y="${actualY}"
+          width="${barW}"
+          height="${actualH}"
+          rx="5"
+          fill="${selected ? "#1479c9" : "#9fc4ea"}"
+        />
+
+        <text
+          x="${cx}"
+          y="${actualY-9}"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="600"
+          fill="#24496b">
+          ${config.numberFormat(x[config.actualKey])}
+        </text>
+
+        <text
+          x="${cx}"
+          y="${H-27}"
+          text-anchor="middle"
+          font-size="11"
+          fill="${selected ? "#1479c9" : "#60758b"}"
+          font-weight="${selected ? "700" : "400"}">
+          ${x.month}
+        </text>
+      `;
+    }).join("");
+
+    const targetPoints = data.map((x,i)=>{
+
+      const cx = left + gap*i + gap/2;
+      const cy = y(x[config.targetKey]);
+
+      return `${cx},${cy}`;
+    }).join(" ");
+
+    const targetDots = data.map((x,i)=>{
+
+      const cx = left + gap*i + gap/2;
+      const cy = y(x[config.targetKey]);
+
+      return `
+        <circle
+          cx="${cx}"
+          cy="${cy}"
+          r="4"
+          fill="#ffffff"
+          stroke="#6d8297"
+          stroke-width="2"/>
+      `;
+    }).join("");
+
+    $(""+containerId).innerHTML = `
+
+      <div style="
+        width:100%;
+        overflow:hidden;
+        background:#ffffff;
+        border-radius:12px;
+      ">
+
+        <svg
+          viewBox="0 0 ${W} ${H}"
+          width="100%"
+          height="300"
+          preserveAspectRatio="xMidYMid meet">
+
+          <!-- Grid -->
+          <line
+            x1="${left}"
+            y1="${top+chartH}"
+            x2="${W-right}"
+            y2="${top+chartH}"
+            stroke="#d9e3ec"/>
+
+          <line
+            x1="${left}"
+            y1="${top+chartH*0.66}"
+            x2="${W-right}"
+            y2="${top+chartH*0.66}"
+            stroke="#edf2f6"/>
+
+          <line
+            x1="${left}"
+            y1="${top+chartH*0.33}"
+            x2="${W-right}"
+            y2="${top+chartH*0.33}"
+            stroke="#edf2f6"/>
+
+          <line
+            x1="${left}"
+            y1="${top}"
+            x2="${W-right}"
+            y2="${top}"
+            stroke="#edf2f6"/>
+
+          <!-- Chart title -->
+          <text
+            x="${left}"
+            y="20"
+            font-size="13"
+            font-weight="700"
+            fill="#1e4568">
+            ${config.title}
+          </text>
+
+          <!-- Actual bars -->
+          ${bars}
+
+          <!-- Target line -->
+          <polyline
+            points="${targetPoints}"
+            fill="none"
+            stroke="#6d8297"
+            stroke-width="2"
+            stroke-dasharray="7 5"/>
+
+          ${targetDots}
+
+          <!-- Legend -->
+          <rect
+            x="${left}"
+            y="${H-14}"
+            width="11"
+            height="11"
+            rx="2"
+            fill="#9fc4ea"/>
+
+          <text
+            x="${left+17}"
+            y="${H-5}"
+            font-size="10"
+            fill="#60758b">
+            ${config.actualLabel}
+          </text>
+
+          <line
+            x1="${left+105}"
+            y1="${H-9}"
+            x2="${left+123}"
+            y2="${H-9}"
+            stroke="#6d8297"
+            stroke-width="2"
+            stroke-dasharray="5 4"/>
+
+          <text
+            x="${left+130}"
+            y="${H-5}"
+            font-size="10"
+            fill="#60758b">
+            ${config.targetLabel}
+          </text>
+
+          ${selectedIndex>=0 ? `
+            <rect
+              x="${left+230}"
+              y="${H-14}"
+              width="11"
+              height="11"
+              rx="2"
+              fill="#1479c9"/>
+
+            <text
+              x="${left+247}"
+              y="${H-5}"
+              font-size="10"
+              fill="#60758b">
+              Selected: ${data[selectedIndex].month}
+            </text>
+          ` : ""}
+
+        </svg>
+
+      </div>
+
+      <div style="
+        margin:4px 14px 14px;
+        padding:14px 18px;
+        background:#eef6ff;
+        border-left:4px solid #1479c9;
+        border-radius:10px;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:20px;
+      ">
+
+        <div>
+          <div style="
+            font-size:11px;
+            font-weight:800;
+            letter-spacing:.8px;
+            color:#1479c9;
+            margin-bottom:4px;">
+            ${config.insightTitle}
           </div>
-          <div class="barlabel">${x.k}</div>
-        </div>`
-      ).join("")
-    }</div>
-    <div class="legend">
-      Actual ■ &nbsp; Target ■
-      ${selectedMonth?`• Selected month: ${selectedMonth}`:""}
-    </div>`;
 
-  const maxq=Math.max(
-    ...d.map(x=>x.q),
-    ...d.map(x=>x.tq),
-    1
-  );
-
-  $("volumeChart").innerHTML=
-    `<div class="bars">${
-      d.map(x=>
-        `<div class="chartcol">
-          <div class="barwrap">
-            <div class="bar qty" style="height:${x.q/maxq*100}%"></div>
-            <div class="bar target" style="height:${x.tq/maxq*100}%"></div>
+          <div style="
+            font-size:14px;
+            font-weight:700;
+            color:#24496b;">
+            ${config.insightText}
           </div>
-          <div class="barlabel">${x.k}</div>
-        </div>`
-      ).join("")
-    }</div>
-    <div class="legend">
-      Actual QTY ■ &nbsp; Target QTY ■
-      ${selectedMonth?`• Selected month: ${selectedMonth}`:""}
-    </div>`;
+
+          <div style="
+            font-size:11px;
+            color:#60758b;
+            margin-top:3px;">
+            Achievement ${config.achievement}
+          </div>
+        </div>
+
+        <div style="
+          padding:9px 14px;
+          border-radius:10px;
+          background:#fff0f0;
+          color:#df4b4b;
+          font-size:13px;
+          font-weight:800;
+          white-space:nowrap;">
+          ▼ ${config.achievement}
+        </div>
+
+      </div>
+    `;
+  }
+
+  const selectedData =
+    data.find(x=>String(x.month)===String(selectedMonth).padStart(2,"0"))
+    || data[data.length-1];
+
+  const amountAchievement =
+    selectedData.t
+      ? selectedData.a / selectedData.t
+      : 0;
+
+  const qtyAchievement =
+    selectedData.tq
+      ? selectedData.q / selectedData.tq
+      : 0;
+
+  buildChart("trendChart",{
+    actualKey:"a",
+    targetKey:"t",
+    title:"NET AMOUNT",
+    actualLabel:"Actual",
+    targetLabel:"Target",
+    numberFormat:v=>(v/1000000).toFixed(2)+" MB",
+    insightTitle:"MONTHLY INSIGHT",
+    insightText:
+      `Net Amount ${money(selectedData.a)} ต่ำกว่า Target ${money(Math.abs(selectedData.a-selectedData.t))}`,
+    achievement:pct(amountAchievement)
+  });
+
+  buildChart("volumeChart",{
+    actualKey:"q",
+    targetKey:"tq",
+    title:"QTY",
+    actualLabel:"Actual QTY",
+    targetLabel:"Target QTY",
+    numberFormat:v=>nf.format(Math.round(v)),
+    insightTitle:"QTY INSIGHT",
+    insightText:
+      `QTY ${num(selectedData.q)} ต่ำกว่า Target ${num(Math.abs(selectedData.q-selectedData.tq))}`,
+    achievement:pct(qtyAchievement)
+  });
 }
 
 function renderProduct(rows){
