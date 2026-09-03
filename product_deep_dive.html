@@ -154,8 +154,13 @@
 
 /* Action Recommendation — full-width 5-step executive layout at bottom */
 .action-panel{width:100%;box-sizing:border-box;margin-top:14px;margin-bottom:18px}
-.action-grid-5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;width:100%}
-.action-card{border:1px solid #d8e3ef;border-radius:10px;padding:14px 15px;background:#fff;min-height:178px;box-sizing:border-box}
+.action-grid-5{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;width:100%}
+.action-card{border:1px solid #d8e3ef;border-radius:10px;padding:14px 16px;background:#fff;min-height:178px;box-sizing:border-box}
+.action-card:nth-child(1){grid-column:span 2}
+.action-card:nth-child(2){grid-column:span 2}
+.action-card:nth-child(3){grid-column:span 2}
+.action-card:nth-child(4){grid-column:span 3}
+.action-card:nth-child(5){grid-column:span 3}
 .action-top{display:flex;align-items:flex-start;gap:9px;padding-bottom:9px;margin-bottom:9px;border-bottom:1px solid #e5edf5}
 .action-no{display:flex;align-items:center;justify-content:center;flex:0 0 27px;width:27px;height:27px;border-radius:50%;font-weight:800;color:#fff;background:#1467c7;font-size:13px}
 .action-title{font-size:12px;font-weight:800;line-height:1.4;color:#153b63}
@@ -165,7 +170,10 @@
 .action-green{border-top:3px solid #15936b}.action-blue{border-top:3px solid #2878d5}
 .action-red{border-top:3px solid #e44b5d}.action-purple{border-top:3px solid #8064d9}
 .action-cyan{border-top:3px solid #1a9bb5}
-@media(max-width:1100px){.action-grid-5{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:1100px){
+  .action-grid-5{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .action-card:nth-child(n){grid-column:span 1}
+}
 @media(max-width:700px){.action-grid-5{grid-template-columns:1fr}}
 
 </style>
@@ -214,7 +222,7 @@
   <section id="actionPanel" class="panel action-panel">
     <div class="panel-head">
       <h2>ข้อเสนอแนะเพื่อการดำเนินการ (Action Recommendation)</h2>
-      <span>WHAT → WHY → WHICH → WHERE → ACTION</span>
+      <span id="actionScopeLabel">WHAT → WHY → WHICH → WHERE → ACTION</span>
     </div>
     <div class="action-grid-5">
       <div class="action-card action-green">
@@ -402,6 +410,12 @@ function render(){
     : level==='brand' ? b
     : level==='product' ? p : 'ภาพรวม';
 
+  const levelLabel = level==='shop' ? 'ระดับ Shop'
+    : level==='model' ? 'ระดับ Model'
+    : level==='brand' ? 'ระดับ Brand'
+    : level==='product' ? 'ระดับ Product' : 'ภาพรวม';
+  $('actionScopeLabel').textContent = `${levelLabel}: ${focusName} | WHAT → WHY → WHICH → WHERE → ACTION`;
+
   const posDriver = level==='shop' ? null
     : level==='model' ? topModelPos
     : level==='brand' ? topBrandPos
@@ -446,9 +460,9 @@ function render(){
       • กำหนดเป้าหมายรายสัปดาห์เพื่อให้สามารถปรับทรัพยากรได้ทันก่อนสิ้นเดือน
     `;
     monitorText = `
-      • ติดตาม <b>Net Amount / QTY / ASP / MOM</b> ของร้านนี้เทียบเดือนก่อนอย่างต่อเนื่อง<br>
-      • ตรวจสอบ Top 3 Growth Model และ Top 3 Negative Model ทุกสัปดาห์<br>
-      • หาก Negative Driver ต่อเนื่อง 2 รอบ ให้ยกระดับเป็นประเด็นแก้ไขเชิงบริหาร
+      • ติดตาม <b>Net Amount / QTY / ASP / MOM</b> ของร้านนี้เทียบเดือนก่อนและเทียบเป้าหมายที่เกี่ยวข้อง<br>
+      • ตรวจสอบ Top 3 Growth Model และ Top 3 Negative Model รายสัปดาห์ พร้อมระบุผู้รับผิดชอบแต่ละประเด็น<br>
+      • หาก Negative Driver ต่อเนื่อง 2 รอบ ให้จัดทำ Recovery Plan และยกระดับเป็นประเด็นแก้ไขเชิงบริหาร
     `;
   } else if(level==='model'){
     maintainText = `
