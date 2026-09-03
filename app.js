@@ -328,12 +328,14 @@ function renderTrend(rows){
     const chartW = W-left-right;
     const chartH = H-top-bottom;
 
-    const max = Math.max(
-      ...data.map(x=>x[config.actualKey]),
-      ...data.map(x=>x[config.targetKey]),
-      1
-    );
+ const maxValue = Math.max(
+  ...data.map(x=>x[config.actualKey]),
+  ...data.map(x=>x[config.targetKey]),
+  1
+);
 
+const max = maxValue * 1.15;
+    
     const gap = chartW / data.length;
     const barW = Math.min(42,gap*0.55);
 
@@ -479,9 +481,9 @@ function renderTrend(rows){
           <polyline
             points="${targetPoints}"
             fill="none"
-            stroke="#6d8297"
-            stroke-width="2"
-            stroke-dasharray="7 5"/>
+            stroke="#5b7187"
+            stroke-width="3"
+            stroke-dasharray="7 5"
 
           ${targetDots}
 
