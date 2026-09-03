@@ -101,6 +101,20 @@
     <div class="kpi"><span>GROWTH DRIVER</span><strong id="driver">-</strong><small id="driverNote">-</small></div>
   </section>
   <div class="insight" id="insight">-</div>
+
+  <section id="qtyAspDriver" class="panel driver-panel">
+    <div class="panel-head">
+      <h2>Growth Decomposition — QTY vs ASP</h2>
+      <span>What drives MOM Net Amount?</span>
+    </div>
+    <div class="driver-grid">
+      <div class="driver-card"><div class="driver-label">QTY IMPACT</div><div id="qtyImpact" class="driver-value">—</div><div class="driver-note">Δ QTY × Previous ASP</div></div>
+      <div class="driver-card"><div class="driver-label">ASP IMPACT</div><div id="aspImpact" class="driver-value">—</div><div class="driver-note">Δ ASP × Previous QTY</div></div>
+      <div class="driver-card"><div class="driver-label">INTERACTION</div><div id="interactionImpact" class="driver-value">—</div><div class="driver-note">Δ QTY × Δ ASP</div></div>
+      <div class="driver-card"><div class="driver-label">TOTAL MOM CHANGE</div><div id="totalImpact" class="driver-value">—</div><div class="driver-note">Current Net Amount − Previous Month</div></div>
+    </div>
+  </section>
+
   <section class="grid">
     <div class="panel"><div class="panel-head"><h2>Brand Performance</h2><span>Selected month</span></div><div class="table-wrap" id="brandTable"></div></div>
     <div class="panel"><div class="panel-head"><h2>Model Driver</h2><span>Contribution to MOM</span></div><div class="table-wrap" id="modelTable"></div></div>
@@ -144,6 +158,28 @@ function render(){
   const comp=filtered(['month']);
   const prev=agg(comp.filter(r=>+r.MONTH===m-1));
   const mom=prev.a?a.a/prev.a-1:null;
+
+  // Decompose MOM Net Amount change into QTY, ASP and interaction effects.
+  const prevQty=prev.q||0;
+  const prevAsp=prevQty?prev.a/prevQty:0;
+  const curQty=a.q||0;
+  const curAsp=curQty?a.a/curQty:0;
+  const qtyImpact=(curQty-prevQty)*prevAsp;
+  const aspImpact=(curAsp-prevAsp)*prevQty;
+  const interaction=(curQty-prevQty)*(curAsp-prevAsp);
+  const totalImpact=a.a-prev.a;
+
+  const setImpact=(id,v)=>{
+    const el=$(id);
+    if(!el)return;
+    el.textContent=(v>=0?'+':'')+money(v);
+    el.className='driver-value '+(v>0?'positive':v<0?'negative':'');
+  };
+  setImpact('qtyImpact',qtyImpact);
+  setImpact('aspImpact',aspImpact);
+  setImpact('interactionImpact',interaction);
+  setImpact('totalImpact',totalImpact);
+
 
   $('amount').textContent=money(a.a);
   $('qty').textContent=num(a.q);
