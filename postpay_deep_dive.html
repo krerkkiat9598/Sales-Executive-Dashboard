@@ -211,4 +211,14 @@ $('actionFix').innerHTML=neg?`• เร่งแก้ <b>${esc(neg.gpsku)}</b>
 $('actionResource').innerHTML=spos?`• จัดสรรทรัพยากรไปยังร้าน <b>${esc(spos.shop)}</b> ที่สร้าง Contribution สูง<br>• ใช้ GP_SKU Driver เป็นฐานวางแผน Stock / Campaign`: '• จัดลำดับทรัพยากรตาม GP_SKU และ Shop Contribution';
 $('actionMonitor').innerHTML=`• ติดตาม MOM ของ GP_SKU และ Shop ทุกเดือน<br>• หากยอดลดลงต่อเนื่อง 2 เดือน ให้เปิด Recovery Plan<br>• ${qi>=ai?'เน้น QTY เป็นตัวชี้วัดหลัก':'เน้น ASP เป็นตัวชี้วัดหลัก'} ในรอบติดตามถัดไป`;
 }
-init();</script></body></html>
+init();</script>
+  <script>
+(function(){
+  const back = document.querySelector("a.back");
+  if(back){
+    back.href = "index.html";
+    back.textContent = "← Company Overview";
+  }
+})();
+</script>
+</body></html>
