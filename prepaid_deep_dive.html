@@ -174,23 +174,31 @@ function render(){
     <td class="num">${qtyFmt(x.qty)}</td><td class="num">${qtyFmt(x.pqty)}</td><td class="num ${cls(x.dq)}">${x.dq>=0?"+":""}${qtyFmt(x.dq)}</td><td class="num">${Math.round(x.asp).toLocaleString()}</td>
   </tr>`).join("") : `<tr><td colspan="9">ไม่มีข้อมูล</td></tr>`;
 
+  const isShopSelected = shop !== "All Shops";
   const topShop=shops.find(x=>x.delta>0)||null, negShop=[...shops].filter(x=>x.delta<0).sort((a,b)=>a.delta-b.delta)[0]||null;
+  const action2 = isShopSelected
+    ? `รักษา Momentum ของ <b>${escapeHtml(shop)}</b> โดยผลักดัน SIM_TYPE ที่มี MOM เป็นบวก<br><span class="muted">ใช้ Driver ที่เติบโตเพื่อเพิ่ม QTY โดยรักษา ASP</span>`
+    : `ขยาย SIM_TYPE ที่มี MOM เป็นบวกไปยัง Shop ที่ยังมี Gap<br><span class="muted">ใช้ Driver ที่เติบโตเพื่อเพิ่ม QTY โดยรักษา ASP</span>`;
+  const action4 = isShopSelected
+    ? `จัดลำดับทรัพยากรภายใน <b>${escapeHtml(shop)}</b><br><span class="muted">เน้น SIM_TYPE ที่สร้าง Growth และมีโอกาสเพิ่ม QTY</span>`
+    : (topShop ? `สนับสนุน Shop ที่สร้าง Growth สูง เช่น <b>${escapeHtml(topShop.name)}</b>` : `สนับสนุน Shop ที่สร้าง Growth สูง`);
+  const action5 = isShopSelected
+    ? `ติดตาม <b>${escapeHtml(shop)}</b> เป็นพิเศษ<br><span class="muted">ดู MOM Net Amount, MOM QTY และ SIM_TYPE Driver รายเดือน</span>`
+    : (negShop ? `ติดตาม <b>${escapeHtml(negShop.name)}</b> เป็นพิเศษ` : `ติดตาม Shop ที่มี MOM ติดลบเป็นพิเศษ`);
   $("actions").innerHTML=`
     <div class="action"><h3>1. รักษา Momentum</h3><ul>
       <li>รักษา <b>SIM_TYPE</b> ที่เป็น Growth Driver ${top?escapeHtml(top.name)+" "+deltaK(top.delta):"จากข้อมูลจริง"}</li>
       <li>ติดตาม QTY และ ASP ของ SIM_TYPE หลักอย่างต่อเนื่อง</li></ul></div>
     <div class="action"><h3>2. ขยายโอกาสการเติบโต</h3><ul>
-      <li>ขยาย SIM_TYPE ที่มี MOM เป็นบวกไปยัง Shop ที่ยังมี Gap</li>
-      <li>ใช้ Driver ที่เติบโตเพื่อเพิ่ม QTY โดยรักษา ASP</li></ul></div>
+      <li>${action2}</li></ul></div>
     <div class="action"><h3>3. แก้ไขประเด็นสำคัญ</h3><ul>
       <li>${neg?`แก้ไข <b>${escapeHtml(neg.name)}</b> ที่ลดลง ${moneyK(Math.abs(neg.delta))} MOM`:"ตรวจสอบ SIM_TYPE ที่มีการลดลง"}</li>
       <li>ทบทวน QTY / ASP และสาเหตุของการลดลง</li></ul></div>
     <div class="action"><h3>4. จัดสรรทรัพยากรและประมาณการ</h3><ul>
-      <li>จัดลำดับพื้นที่ตาม Shop Contribution</li>
-      <li>${topShop?`สนับสนุน Shop ที่สร้าง Growth สูง เช่น <b>${escapeHtml(topShop.name)}</b>`:"สนับสนุน Shop ที่สร้าง Growth สูง"}</li></ul></div>
+      <li>${action4}</li></ul></div>
     <div class="action"><h3>5. ติดตามและประเมินผล</h3><ul>
       <li>ติดตาม MOM Net Amount และ MOM QTY รายเดือน</li>
-      <li>${negShop?`ติดตาม <b>${escapeHtml(negShop.name)}</b> เป็นพิเศษ`:"ติดตาม Shop ที่มี MOM ติดลบเป็นพิเศษ"}</li></ul></div>`;
+      <li>${action5}</li></ul></div>`;
 }
 
 $("year").addEventListener("change",()=>{updateShops();render()});
