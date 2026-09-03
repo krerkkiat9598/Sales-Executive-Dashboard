@@ -1268,3 +1268,70 @@ $("resetBtn").addEventListener("click",()=>{
 
 populate();
 render();
+
+/* ===== Highlight Selected Month ===== */
+(function(){
+
+  function highlightSelectedMonth(){
+
+    const month = parseInt($("fMonth").value || "0", 10);
+    if(!month) return;
+
+    ["trendChart","volumeChart"].forEach(chartId => {
+
+      const chart = $(chartId);
+      if(!chart) return;
+
+      /* SVG charts */
+      let bars = [...chart.querySelectorAll("svg rect")]
+        .filter(el => {
+          const fill = (el.getAttribute("fill") || "").toLowerCase();
+          const h = parseFloat(el.getAttribute("height") || "0");
+          const w = parseFloat(el.getAttribute("width") || "0");
+
+          return (
+            h > 20 &&
+            w > 10 &&
+            (
+              fill === "#9fc4ea" ||
+              fill === "#9fc4ea" ||
+              fill.includes("159,196,234")
+            )
+          );
+        });
+
+      /* HTML bar charts */
+      if(!bars.length){
+        bars = [...chart.querySelectorAll(".bar.actual,.bar.qty")];
+      }
+
+      if(!bars.length) return;
+
+      bars.forEach((bar,index) => {
+
+        const isSelected = index === month - 1;
+
+        if(bar.tagName.toLowerCase() === "rect"){
+          bar.setAttribute(
+            "fill",
+            isSelected ? "#006FC9" : "#9FC4EA"
+          );
+        }else{
+          bar.style.background = isSelected
+            ? "#006FC9"
+            : "#9FC4EA";
+        }
+
+        bar.style.transition = "all .2s ease";
+      });
+
+    });
+  }
+
+  $("fMonth").addEventListener("change",()=>{
+    setTimeout(highlightSelectedMonth,50);
+  });
+
+  setTimeout(highlightSelectedMonth,100);
+
+})();
