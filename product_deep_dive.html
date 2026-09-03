@@ -22,8 +22,8 @@
       <div class="filter-item"><label>SHOP</label><select id="shop"><option value="">All Shops</option></select></div>
   </section>
   <section class="kpis">
-    <div class="kpi"><span>NET AMOUNT</span><strong id="amount">-</strong><small id="target">Target: —</small></div>
-    <div class="kpi"><span>QTY</span><strong id="qty">-</strong><small id="qtarget">Target QTY: —</small></div>
+    <div class="kpi"><span>NET AMOUNT</span><strong id="amount">-</strong></div>
+    <div class="kpi"><span>QTY</span><strong id="qty">-</strong></div>
     <div class="kpi"><span>ASP</span><strong id="asp">-</strong><small>Net Amount / QTY</small></div>
     <div class="kpi"><span>MOM NET AMOUNT</span><strong id="mom">-</strong><small>vs previous month</small></div>
     <div class="kpi"><span>YOY NET AMOUNT</span><strong id="yoy">-</strong><small>Brand/Model: 2025 detail not available</small></div>
@@ -64,55 +64,73 @@ function monthRows(rows,month){return rows.filter(r=>+r.MONTH===+month)}
 function momFor(rows,dim){const m=+$('month').value||8;const cur=agg(rows.filter(r=>+r.MONTH===m));const prev=agg(rows.filter(r=>+r.MONTH===m-1));return prev.a?cur.a/prev.a-1:null}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function cls(v){return v>=1?'good':v>=.95?'watch':'bad'}
-
-function scopeRows(excludeId){
-  const ids=['year','month','product','brand','model','channel','shop'];
-  return base().filter(r=>{
-    for(const id of ids){
-      if(id===excludeId) continue;
-      const v=$(id).value;
-      if(!v) continue;
-      const key=id==='year'?'YEAR':id==='month'?'MONTH':id==='shop'?'SHOP_NAME':id.toUpperCase();
-      if(clean(r[key])!==v) return false;
-    }
-    return true;
-  });
-}
-function refreshCascadingFilters(){
-  const defs=[
-    ['product','PRODUCT','All Products'],
-    ['brand','BRAND','All Brands'],
-    ['model','MODEL','All Models'],
-    ['channel','CHANNEL','All Channels'],
-    ['shop','SHOP_NAME','All Shops']
-  ];
-  for(const [id,key,all] of defs){
-    const vals=scopeRows(id).map(r=>r[key]);
-    fill(id,vals,all);
-  }
-}
-
 function render(){
- const rows=filtered(); const m=+$('month').value||8; const a=agg(rows); const prev=agg(rows.filter(r=>+r.MONTH===m-1)); const mom=prev.a?a/prev.a-1:null;
- $('amount').textContent=money(a.a);$('qty').textContent=num(a.q);$('asp').textContent=num(a.q?a.a/a.q:0);$('mom').textContent=mom===null?'—':(mom>=0?'+':'')+pct(mom);$('mom').className=mom===null?'':mom>=0?'positive':'negative';$('yoy').textContent='—';
- const modelScope=filtered(['model']); const modelData=uniq(modelScope.map(r=>r.MODEL)).map(model=>{const rr=modelScope.filter(r=>clean(r.MODEL)===model);const cur=agg(rr.filter(r=>+r.MONTH===m));const pr=agg(rr.filter(r=>+r.MONTH===m-1));return {model,amount:cur.a,qty:cur.q,mom:pr.a?cur.a/pr.a-1:null,delta:cur.a-pr.a}}).sort((x,y)=>Math.abs(y.delta)-Math.abs(x.delta));
- const driver=modelData[0];$('driver').textContent=driver?esc(driver.model):'—';$('driverNote').textContent=driver?((driver.delta>=0?'+':'')+money(driver.delta)+' MOM'):'—';
- const brandScope=filtered(['brand','model']); const brands=uniq(brandScope.map(r=>r.BRAND)).map(brand=>{const rr=brandScope.filter(r=>clean(r.BRAND)===brand);const cur=agg(rr.filter(r=>+r.MONTH===m));const pr=agg(rr.filter(r=>+r.MONTH===m-1));return {brand,amount:cur.a,qty:cur.q,mom:pr.a?cur.a/pr.a-1:null,delta:cur.a-pr.a}}).sort((a,b)=>b.amount-a.amount);
- $('brandTable').innerHTML='<table><thead><tr><th>Brand</th><th>Net Amount</th><th>QTY</th><th>ASP</th><th>MOM</th><th>Δ MOM</th></tr></thead><tbody>'+brands.map(x=>`<tr><td><b>${esc(x.brand)}</b></td><td>${money(x.amount)}</td><td>${num(x.qty)}</td><td>${num(x.qty?x.amount/x.qty:0)}</td><td class="${x.mom===null?'':x.mom>=0?'positive':'negative'}">${x.mom===null?'—':(x.mom>=0?'+':'')+pct(x.mom)}</td><td class="${x.delta>=0?'positive':'negative'}">${x.delta>=0?'+':''}${money(x.delta)}</td></tr>`).join('')+'</tbody></table>';
- $('modelTable').innerHTML='<table><thead><tr><th>Model</th><th>Net Amount</th><th>QTY</th><th>ASP</th><th>MOM</th><th>Δ MOM</th></tr></thead><tbody>'+modelData.map(x=>`<tr><td><b>${esc(x.model)}</b></td><td>${money(x.amount)}</td><td>${num(x.qty)}</td><td>${num(x.qty?x.amount/x.qty:0)}</td><td class="${x.mom===null?'':x.mom>=0?'positive':'negative'}">${x.mom===null?'—':(x.mom>=0?'+':'')+pct(x.mom)}</td><td class="${x.delta>=0?'positive':'negative'}">${x.delta>=0?'+':''}${money(x.delta)}</td></tr>`).join('')+'</tbody></table>';
- const shops=uniq(rows.map(r=>r.SHOP_NAME)).map(shop=>{const rr=rows.filter(r=>clean(r.SHOP_NAME)===shop);const cur=agg(rr.filter(r=>+r.MONTH===m));const pr=agg(rr.filter(r=>+r.MONTH===m-1));return {shop,amount:cur.a,qty:cur.q,mom:pr.a?cur.a/pr.a-1:null,delta:cur.a-pr.a}}).sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
- $('shopTable').innerHTML='<table><thead><tr><th>Shop</th><th>Net Amount</th><th>QTY</th><th>ASP</th><th>MOM</th><th>Δ MOM</th></tr></thead><tbody>'+shops.map(x=>`<tr><td><b>${esc(x.shop)}</b></td><td>${money(x.amount)}</td><td>${num(x.qty)}</td><td>${num(x.qty?x.amount/x.qty:0)}</td><td class="${x.mom===null?'':x.mom>=0?'positive':'negative'}">${x.mom===null?'—':(x.mom>=0?'+':'')+pct(x.mom)}</td><td class="${x.delta>=0?'positive':'negative'}">${x.delta>=0?'+':''}${money(x.delta)}</td></tr>`).join('')+'</tbody></table>';
- const p=$( 'product').value||'All Products',b=$( 'brand').value||'All Brands',mo=$( 'model').value||'All Models';
- $('insight').innerHTML=`<b>Executive Insight:</b> ${esc(p)}${b!=='All Brands'?' • '+esc(b):''}${mo!=='All Models'?' • '+esc(mo):''} | ${m}M Net Amount <b>${money(a.a)}</b>, QTY <b>${num(a.q)}</b>. MOM ${mom===null?'not available':(mom>=0?'+':'')+pct(mom)}. Brand/Model YOY requires 2025 detailed Device/GIA data; current detailed file starts in 2026.`;
+  const rows=filtered();
+  const m=+$('month').value||8;
+  const a=agg(rows);
+
+  // MOM comparison must use the same filters, but unlock MONTH so prior month is available.
+  const comp=filtered(['month']);
+  const prev=agg(comp.filter(r=>+r.MONTH===m-1));
+  const mom=prev.a?a.a/prev.a-1:null;
+
+  $('amount').textContent=money(a.a);
+  $('qty').textContent=num(a.q);
+  $('asp').textContent=num(a.q?a.a/a.q:0);
+  $('mom').textContent=mom===null?'—':(mom>=0?'+':'')+pct(mom);
+  $('mom').className=mom===null?'':mom>=0?'positive':'negative';
+  $('yoy').textContent='—';
+
+  // Model driver: compare selected month vs previous month under all filters except MONTH and MODEL.
+  const modelScope=filtered(['month','model']);
+  const modelData=uniq(modelScope.map(r=>r.MODEL)).map(model=>{
+    const rr=modelScope.filter(r=>clean(r.MODEL)===model);
+    const cur=agg(rr.filter(r=>+r.MONTH===m));
+    const pr=agg(rr.filter(r=>+r.MONTH===m-1));
+    return {model,amount:cur.a,qty:cur.q,mom:pr.a?cur.a/pr.a-1:null,delta:cur.a-pr.a};
+  }).sort((x,y)=>Math.abs(y.delta)-Math.abs(x.delta));
+
+  const driver=modelData[0];
+  $('driver').textContent=driver?esc(driver.model):'—';
+  $('driverNote').textContent=driver?((driver.delta>=0?'+':'')+money(driver.delta)+' MOM'):'—';
+
+  // Brand table: compare selected month vs previous month under all filters except MONTH and BRAND/MODEL.
+  const brandScope=filtered(['month','brand','model']);
+  const brands=uniq(brandScope.map(r=>r.BRAND)).map(brand=>{
+    const rr=brandScope.filter(r=>clean(r.BRAND)===brand);
+    const cur=agg(rr.filter(r=>+r.MONTH===m));
+    const pr=agg(rr.filter(r=>+r.MONTH===m-1));
+    return {brand,amount:cur.a,qty:cur.q,mom:pr.a?cur.a/pr.a-1:null,delta:cur.a-pr.a};
+  }).sort((a,b)=>b.amount-a.amount);
+
+  $('brandTable').innerHTML='<table><thead><tr><th>Brand</th><th>Net Amount</th><th>QTY</th><th>ASP</th><th>MOM</th><th>Δ MOM</th></tr></thead><tbody>'+
+    brands.map(x=>`<tr><td><b>${esc(x.brand)}</b></td><td>${money(x.amount)}</td><td>${num(x.qty)}</td><td>${num(x.qty?x.amount/x.qty:0)}</td><td class="${x.mom===null?'':x.mom>=0?'positive':'negative'}">${x.mom===null?'—':(x.mom>=0?'+':'')+pct(x.mom)}</td><td class="${x.delta>=0?'positive':'negative'}">${x.delta>=0?'+':''}${money(x.delta)}</td></tr>`).join('')+
+    '</tbody></table>';
+
+  $('modelTable').innerHTML='<table><thead><tr><th>Model</th><th>Net Amount</th><th>QTY</th><th>ASP</th><th>MOM</th><th>Δ MOM</th></tr></thead><tbody>'+
+    modelData.map(x=>`<tr><td><b>${esc(x.model)}</b></td><td>${money(x.amount)}</td><td>${num(x.qty)}</td><td>${num(x.qty?x.amount/x.qty:0)}</td><td class="${x.mom===null?'':x.mom>=0?'positive':'negative'}">${x.mom===null?'—':(x.mom>=0?'+':'')+pct(x.mom)}</td><td class="${x.delta>=0?'positive':'negative'}">${x.delta>=0?'+':''}${money(x.delta)}</td></tr>`).join('')+
+    '</tbody></table>';
+
+  // Shop contribution: compare selected month vs previous month under the current product/brand/model/channel scope.
+  const shopScope=filtered(['month','shop']);
+  const shops=uniq(shopScope.map(r=>r.SHOP_NAME)).map(shop=>{
+    const rr=shopScope.filter(r=>clean(r.SHOP_NAME)===shop);
+    const cur=agg(rr.filter(r=>+r.MONTH===m));
+    const pr=agg(rr.filter(r=>+r.MONTH===m-1));
+    return {shop,amount:cur.a,qty:cur.q,mom:pr.a?cur.a/pr.a-1:null,delta:cur.a-pr.a};
+  }).sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
+
+  $('shopTable').innerHTML='<table><thead><tr><th>Shop</th><th>Net Amount</th><th>QTY</th><th>ASP</th><th>MOM</th><th>Δ MOM</th></tr></thead><tbody>'+
+    shops.map(x=>`<tr><td><b>${esc(x.shop)}</b></td><td>${money(x.amount)}</td><td>${num(x.qty)}</td><td>${num(x.qty?x.amount/x.qty:0)}</td><td class="${x.mom===null?'':x.mom>=0?'positive':'negative'}">${x.mom===null?'—':(x.mom>=0?'+':'')+pct(x.mom)}</td><td class="${x.delta>=0?'positive':'negative'}">${x.delta>=0?'+':''}${money(x.delta)}</td></tr>`).join('')+
+    '</tbody></table>';
+
+  const p=$('product').value||'All Products',b=$('brand').value||'All Brands',mo=$('model').value||'All Models';
+  $('insight').innerHTML=`<b>Executive Insight:</b> ${esc(p)}${b!=='All Brands'?' • '+esc(b):''}${mo!=='All Models'?' • '+esc(mo):''} | ${m}M Net Amount <b>${money(a.a)}</b>, QTY <b>${num(a.q)}</b>. MOM ${mom===null?'not available':(mom>=0?'+':'')+pct(mom)}. Brand/Model YOY requires 2025 detailed Device/GIA data; current detailed file starts in 2026.`;
 }
 function init(){const b=base();fill('year',b.map(r=>r.YEAR),'All Years');$('year').value='2026';fill('month',b.map(r=>r.MONTH),'All Months');$('month').value='8';fill('product',b.map(r=>r.PRODUCT),'All Products');fill('channel',b.map(r=>r.CHANNEL),'All Channels');refreshBrand();refreshModel();render();}
 function refreshBrand(){const rows=filtered(['brand','model']);fill('brand',rows.map(r=>r.BRAND),'All Brands');}
 function refreshModel(){const rows=filtered(['model']);fill('model',rows.map(r=>r.MODEL),'All Models');}
-['year','month','product','channel'].forEach(id=>$(id).addEventListener('change',()=>{refreshBrand();refreshModel();render()}));$('brand').addEventListener('change',()=>{refreshModel();render()});$('model').addEventListener('change',render);__buildData();
+['year','month','product','brand','model','channel','shop'].forEach(id=>$(id)?.addEventListener('change',()=>{refreshCascadingFilters();render();}));__buildData();
 init();
-
-const filterIds=['year','month','product','brand','model','channel','shop'];
-filterIds.forEach(id=>$(id)?.addEventListener('change',()=>{ refreshCascadingFilters(); render(); }));
-refreshCascadingFilters();
 </script>
 </body></html>
