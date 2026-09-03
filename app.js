@@ -544,7 +544,422 @@ function trendRows(){
     })
   );
 }
+/* =========================================================
+   EXECUTIVE TREND CHART — Actual vs Target
+   ========================================================= */
 
+function renderTrend(rows){
+
+  const selectedMonth = $("fMonth").value;
+
+  /* ---------- Monthly aggregation ---------- */
+  const by = {};
+
+  rows.forEach(r=>{
+    const k = `${r.YEAR}-${String(r.MONTH).padStart(2,"0")}`;
+
+    if(!by[k]){
+      by[k] = {
+        a:0,
+        t:0,
+        q:0,
+        tq:0
+      };
+    }
+
+    by[k].a  += +r.NET_AMOUNT || 0;
+    by[k].t  += +r.TARGET_BOTTOMUP_NET_AMOUNT || 0;
+    by[k].q  += +r.QTY || 0;
+    by[k].tq += +r.TARGET_BOTTOMUP_QTY || 0;
+  });
+
+  const data = Object.entries(by)
+    .sort()
+    .map(([k,v])=>({
+      month:k.slice(5),
+      ...v
+    }));
+
+  if(!data.length){
+    $("trendChart").innerHTML = "<div style='padding:30px;text-align:center'>No data</div>";
+    $("volumeChart").innerHTML = "<div style='padding:30px;text-align:center'>No data</div>";
+    return;
+  }
+
+  /* ---------- Shared chart renderer ---------- */
+
+  function buildChart(containerId, config){
+
+    const {
+      actualKey,
+      targetKey,
+      title,
+      actualLabel,
+      targetLabel,
+      numberFormat,
+      insightTitle
+    } = config;
+
+    const values = data.map(d=>+d[actualKey]||0);
+    const targets = data.map(d=>+d[targetKey]||0);
+
+    const maxValue = Math.max(
+      ...values,
+      ...targets,
+      1
+    );
+
+    const selectedIndex = data.findIndex(
+      d=>String(d.month) === String(selectedMonth)
+    );
+
+    /* ---------- SVG target line ---------- */
+
+    const W = 1000;
+    const H = 280;
+
+    const left = 55;
+    const right = 25;
+    const top = 20;
+    const bottom = 45;
+
+    const chartW = W-left-right;
+    const chartH = H-top-bottom;
+
+    const step = chartW / Math.max(data.length,1);
+
+    const points = targets.map((v,i)=>{
+
+      const x = left + step*i + step/2;
+      const y = top + chartH - (v/maxValue)*chartH;
+
+      return `${x},${y}`;
+    }).join(" ");
+
+    /* ---------- Bars ---------- */
+
+    const bars = data.map((d,i)=>{
+
+      const value = +d[actualKey]||0;
+
+      const height = (value/maxValue)*chartH;
+
+      const x = left + step*i + step*0.18;
+
+      const width = step*0.64;
+
+      const y = top + chartH-height;
+
+      const selected =
+        i === selectedIndex;
+
+      return `
+        <rect
+          x="${x}"
+          y="${y}"
+          width="${width}"
+          height="${Math.max(height,1)}"
+          rx="5"
+          fill="${selected ? "#0066CC" : "#8DB8E8"}"
+          opacity="${selected ? "1" : "0.82"}"
+        />
+
+        <text
+          x="${x + width/2}"
+          y="${Math.max(y-7,12)}"
+          text-anchor="middle"
+          font-size="13"
+          font-weight="700"
+          fill="#183B5B"
+        >
+          ${numberFormat(value)}
+        </text>
+
+        <text
+          x="${x + width/2}"
+          y="${H-17}"
+          text-anchor="middle"
+          font-size="12"
+          font-weight="${selected ? "800" : "500"}"
+          fill="${selected ? "#0066CC" : "#667788"}"
+        >
+          ${d.month}
+        </text>
+      `;
+    }).join("");
+
+    /* ---------- Selected month highlight ---------- */
+
+    let highlight = "";
+
+    if(selectedIndex >= 0){
+
+      const x =
+        left +
+        step*selectedIndex;
+
+      highlight = `
+        <rect
+          x="${x}"
+          y="${top}"
+          width="${step}"
+          height="${chartH}"
+          fill="#EAF4FF"
+          opacity="0.75"
+        />
+      `;
+    }
+
+    /* ---------- Target dots ---------- */
+
+    const dots = targets.map((v,i)=>{
+
+      const x = left + step*i + step/2;
+      const y = top + chartH - (v/maxValue)*chartH;
+
+      return `
+        <circle
+          cx="${x}"
+          cy="${y}"
+          r="4"
+          fill="#64748B"
+        />
+      `;
+    }).join("");
+
+    /* ---------- SVG ---------- */
+
+    const svg = `
+      <svg
+        viewBox="0 0 ${W} ${H}"
+        width="100%"
+        height="280"
+        preserveAspectRatio="none"
+      >
+
+        ${highlight}
+
+        <!-- Target line -->
+        <polyline
+          points="${points}"
+          fill="none"
+          stroke="#64748B"
+          stroke-width="3"
+          stroke-dasharray="8 6"
+        />
+
+        ${bars}
+
+        ${dots}
+
+      </svg>
+    `;
+
+    /* ---------- Insight ---------- */
+
+    const current =
+      selectedIndex >= 0
+        ? data[selectedIndex]
+        : data[data.length-1];
+
+    const actual = +current[actualKey]||0;
+    const target = +current[targetKey]||0;
+
+    const gap = actual-target;
+
+    const achievement =
+      target ? actual/target : 0;
+
+    const achievementText =
+      (achievement*100).toFixed(1)+"%";
+
+    const gapText =
+      numberFormat(Math.abs(gap));
+
+    const direction =
+      gap >= 0 ? "สูงกว่า" : "ต่ำกว่า";
+
+    const insight = `
+      <div
+        style="
+          margin-top:10px;
+          padding:14px 18px;
+          border-radius:12px;
+          background:#F1F7FD;
+          border-left:5px solid #0066CC;
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:20px;
+        "
+      >
+
+        <div>
+
+          <div
+            style="
+              font-size:11px;
+              font-weight:800;
+              letter-spacing:.8px;
+              color:#0066CC;
+              margin-bottom:5px;
+            "
+          >
+            ${insightTitle}
+          </div>
+
+          <div
+            style="
+              font-size:14px;
+              font-weight:700;
+              color:#183B5B;
+            "
+          >
+            ${title} ${numberFormat(actual)}
+            ${direction} Target ${gapText}
+          </div>
+
+          <div
+            style="
+              font-size:12px;
+              color:#64748B;
+              margin-top:3px;
+            "
+          >
+            Achievement ${achievementText}
+          </div>
+
+        </div>
+
+        <div
+          style="
+            padding:8px 13px;
+            border-radius:10px;
+            background:${gap>=0 ? "#E8F7EF" : "#FFF0F0"};
+            color:${gap>=0 ? "#15936B" : "#D64545"};
+            font-size:13px;
+            font-weight:800;
+            white-space:nowrap;
+          "
+        >
+          ${gap>=0 ? "▲" : "▼"} ${achievementText}
+        </div>
+
+      </div>
+    `;
+
+    $(containerId).innerHTML = `
+
+      <div
+        style="
+          background:#FFFFFF;
+          border-radius:12px;
+          padding:8px 8px 0 8px;
+        "
+      >
+
+        <div
+          style="
+            display:flex;
+            justify-content:flex-end;
+            align-items:center;
+            gap:18px;
+            padding:0 12px 4px;
+            font-size:11px;
+            color:#64748B;
+          "
+        >
+
+          <span>
+            <span
+              style="
+                display:inline-block;
+                width:10px;
+                height:10px;
+                border-radius:2px;
+                background:#0066CC;
+                margin-right:5px;
+              "
+            ></span>
+            ${actualLabel}
+          </span>
+
+          <span>
+            <span
+              style="
+                display:inline-block;
+                width:22px;
+                border-top:2px dashed #64748B;
+                margin-right:5px;
+                vertical-align:middle;
+              "
+            ></span>
+            ${targetLabel}
+          </span>
+
+          ${
+            selectedMonth
+              ? `<span style="font-weight:700;color:#0066CC">
+                   Selected: ${selectedMonth}
+                 </span>`
+              : ""
+          }
+
+        </div>
+
+        ${svg}
+
+        ${insight}
+
+      </div>
+    `;
+  }
+
+
+  /* =========================================================
+     1. MONTHLY NET AMOUNT
+     ========================================================= */
+
+  buildChart("trendChart",{
+
+    actualKey:"a",
+    targetKey:"t",
+
+    title:"Net Amount",
+
+    actualLabel:"Actual",
+    targetLabel:"Target",
+
+    numberFormat:v=>{
+      return (v/1000000).toFixed(2)+" MB";
+    },
+
+    insightTitle:"MONTHLY INSIGHT"
+  });
+
+
+  /* =========================================================
+     2. MONTHLY QTY
+     ========================================================= */
+
+  buildChart("volumeChart",{
+
+    actualKey:"q",
+    targetKey:"tq",
+
+    title:"QTY",
+
+    actualLabel:"Actual QTY",
+    targetLabel:"Target QTY",
+
+    numberFormat:v=>{
+      return nf.format(Math.round(v));
+    },
+
+    insightTitle:"QTY INSIGHT"
+  });
+
+}
 function render(){
 
   refreshDependent();
