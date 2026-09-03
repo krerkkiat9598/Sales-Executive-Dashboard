@@ -371,7 +371,8 @@ function render(){
   const topBrandPos=brands.filter(x=>x.delta>0).sort((x,y)=>y.delta-x.delta)[0];
   const topBrandNeg=brands.filter(x=>x.delta<0).sort((x,y)=>x.delta-y.delta)[0];
   const topModelPos=modelData.filter(x=>x.delta>0).sort((x,y)=>y.delta-x.delta)[0];
-  const topModelNeg=modelData.filter(x=>x.delta<0).sort((x,y)=>x.delta-y.delta)[0];
+  const topModelNegAll=modelData.filter(x=>x.delta<0).sort((x,y)=>x.delta-y.delta);
+  const topModelNeg=topModelNegAll.find(x=>!topModelPos || clean(x.model)!==clean(topModelPos.model));
   const topShopPos=shops.filter(x=>x.delta>0).sort((x,y)=>y.delta-x.delta)[0];
   const topShopNeg=shops.filter(x=>x.delta<0).sort((x,y)=>x.delta-y.delta)[0];
 
