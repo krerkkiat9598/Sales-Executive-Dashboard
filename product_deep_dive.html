@@ -151,6 +151,23 @@
   .driver-grid{grid-template-columns:1fr}
 }
 
+
+/* Action Recommendation — full-width 5-step executive layout at bottom */
+.action-panel{width:100%;box-sizing:border-box;margin-top:14px;margin-bottom:18px}
+.action-grid-5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;width:100%}
+.action-card{border:1px solid #d8e3ef;border-radius:10px;padding:14px 15px;background:#fff;min-height:178px;box-sizing:border-box}
+.action-top{display:flex;align-items:flex-start;gap:9px;padding-bottom:9px;margin-bottom:9px;border-bottom:1px solid #e5edf5}
+.action-no{display:flex;align-items:center;justify-content:center;flex:0 0 27px;width:27px;height:27px;border-radius:50%;font-weight:800;color:#fff;background:#1467c7;font-size:13px}
+.action-title{font-size:12px;font-weight:800;line-height:1.4;color:#153b63}
+.action-en{font-size:9px;color:#66809b;margin-top:2px}
+.action-text{font-size:11.5px;line-height:1.65;color:#183b5b}
+.action-text b{font-weight:800}
+.action-green{border-top:3px solid #15936b}.action-blue{border-top:3px solid #2878d5}
+.action-red{border-top:3px solid #e44b5d}.action-purple{border-top:3px solid #8064d9}
+.action-cyan{border-top:3px solid #1a9bb5}
+@media(max-width:1100px){.action-grid-5{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.action-grid-5{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -192,6 +209,35 @@
     <div class="panel"><div class="panel-head"><h2>Brand Performance</h2><span>Selected month</span></div><div class="table-wrap" id="brandTable"></div></div>
     <div class="panel"><div class="panel-head"><h2>Model Driver</h2><span>Contribution to MOM</span></div><div class="table-wrap" id="modelTable"></div></div>
     <div class="panel full"><div class="panel-head"><h2>Shop Contribution</h2><span>Selected Product / Brand / Model</span></div><div class="table-wrap" id="shopTable"></div></div>
+  </section>
+
+  <section id="actionPanel" class="panel action-panel">
+    <div class="panel-head">
+      <h2>ข้อเสนอแนะเพื่อการดำเนินการ (Action Recommendation)</h2>
+      <span>WHAT → WHY → WHICH → WHERE → ACTION</span>
+    </div>
+    <div class="action-grid-5">
+      <div class="action-card action-green">
+        <div class="action-top"><span class="action-no">1</span><div><div class="action-title">รักษา Momentum และเสริมจุดแข็ง</div><div class="action-en">Keep the Momentum</div></div></div>
+        <div id="actionMaintain" class="action-text">—</div>
+      </div>
+      <div class="action-card action-blue">
+        <div class="action-top"><span class="action-no">2</span><div><div class="action-title">เร่งขยายโอกาสการเติบโต</div><div class="action-en">Expand Opportunities</div></div></div>
+        <div id="actionGrow" class="action-text">—</div>
+      </div>
+      <div class="action-card action-red">
+        <div class="action-top"><span class="action-no">3</span><div><div class="action-title">เร่งแก้ไขประเด็นสำคัญ</div><div class="action-en">Address Key Issues</div></div></div>
+        <div id="actionFix" class="action-text">—</div>
+      </div>
+      <div class="action-card action-purple">
+        <div class="action-top"><span class="action-no">4</span><div><div class="action-title">จัดสรรทรัพยากรและประมาณการ</div><div class="action-en">Resource &amp; Planning</div></div></div>
+        <div id="actionResource" class="action-text">—</div>
+      </div>
+      <div class="action-card action-cyan">
+        <div class="action-top"><span class="action-no">5</span><div><div class="action-title">ติดตามและประเมินผล</div><div class="action-en">Monitor &amp; Follow Up</div></div></div>
+        <div id="actionMonitor" class="action-text">—</div>
+      </div>
+    </div>
   </section>
 </div>
 <script>
@@ -341,6 +387,168 @@ function render(){
     {name:'ราคาขายเฉลี่ย',v:aspImpact},
     {name:'ผลกระทบร่วม',v:interaction}
   ].sort((x,y)=>Math.abs(y.v)-Math.abs(x.v))[0];
+
+  const scope = [p,b!=='All Brands'?b:null,mo!=='All Models'?mo:null,ch!=='All Channels'?ch:null,sh!=='All Shops'?sh:null].filter(Boolean).join(' • ') || 'ภาพรวม';
+
+  // Dynamic Action Recommendation follows the current drill-down:
+  // All → Product → Brand → Model → Shop.
+  const level = sh!=='All Shops' ? 'shop'
+    : mo!=='All Models' ? 'model'
+    : b!=='All Brands' ? 'brand'
+    : p!=='All Products' ? 'product' : 'overall';
+
+  const focusName = level==='shop' ? sh
+    : level==='model' ? mo
+    : level==='brand' ? b
+    : level==='product' ? p : 'ภาพรวม';
+
+  const posDriver = level==='shop' ? null
+    : level==='model' ? topModelPos
+    : level==='brand' ? topBrandPos
+    : topModelPos;
+
+  const negDriver = level==='shop' ? null
+    : level==='model' ? topModelNeg
+    : level==='brand' ? topBrandNeg
+    : topModelNeg;
+
+  const posShop = topShopPos;
+  const negShop = topShopNeg;
+
+  const fmtDelta = v => `${v>=0?'+':''}${money(v)}`;
+  const driverName = primaryDriver.name;
+  const driverValue = fmtDelta(primaryDriver.v);
+
+  let maintainText, growText, fixText, resourceText, monitorText;
+
+  if(level==='shop'){
+    maintainText = `
+      • รักษาฐานยอดขายของ <b>${esc(focusName)}</b> ซึ่งปัจจุบันมียอดขายสุทธิ <b>${money(a.a)}</b> และ QTY <b>${num(a.q)}</b><br>
+      • รักษา Model ที่สร้างยอดขายหลัก และกำหนดรายการ Top Model ที่ต้องรักษาเป็นรายเดือน<br>
+      • ใช้ <b>ASP ${num(a.q?a.a/a.q:0)}</b> เป็นฐานติดตามคุณภาพของยอดขาย ไม่เน้นเพิ่ม QTY เพียงอย่างเดียว
+    `;
+    growText = `
+      • เพิ่มยอดขายที่ <b>${esc(focusName)}</b> โดยเน้นปัจจัยหลักคือ <b>${esc(driverName)}</b> (${driverValue})<br>
+      • เจาะ Model ที่มี Demand สูงและเพิ่ม Conversion จากลูกค้าที่เข้าร้าน โดยเฉพาะ Model ที่มี Δ MOM เป็นบวก<br>
+      • กำหนดเป้าหมายราย Model และติดตามผลเทียบเดือนก่อนเพื่อให้เห็นผลของ Action โดยตรง
+    `;
+    fixText = negDriver ? `
+      • เร่งแก้ไข Model <b>${esc(negDriver.model)}</b> ซึ่งเป็น Negative Driver <b>${fmtDelta(negDriver.delta)}</b><br>
+      • ตรวจสอบ <b>QTY / ASP / Availability / Sales Execution</b> และระบุสาเหตุที่เกิดขึ้นจริงในระดับร้าน<br>
+      • จัดทำ Recovery Plan พร้อมผู้รับผิดชอบและกำหนดวันติดตามผล
+    ` : `
+      • ยังไม่พบ Negative Driver ที่มีนัยสำคัญในระดับ Model<br>
+      • ตรวจสอบ Model ที่มี MOM ต่ำหรือไม่มีการเติบโต เพื่อป้องกันการชะลอตัวในเดือนถัดไป
+    `;
+    resourceText = `
+      • จัดสรรกำลังขายและ Stock ให้กับ Model ที่มี Demand สูงภายใน <b>${esc(focusName)}</b><br>
+      • หาก <b>QTY</b> เป็นปัจจัยหลัก ให้เน้น Availability / Stock / Sales Conversion; หาก <b>ASP</b> เป็นปัจจัยหลัก ให้เน้น Product Mix และรุ่นราคาสูง<br>
+      • กำหนดเป้าหมายรายสัปดาห์เพื่อให้สามารถปรับทรัพยากรได้ทันก่อนสิ้นเดือน
+    `;
+    monitorText = `
+      • ติดตาม <b>Net Amount / QTY / ASP / MOM</b> ของร้านนี้เทียบเดือนก่อนอย่างต่อเนื่อง<br>
+      • ตรวจสอบ Top 3 Growth Model และ Top 3 Negative Model ทุกสัปดาห์<br>
+      • หาก Negative Driver ต่อเนื่อง 2 รอบ ให้ยกระดับเป็นประเด็นแก้ไขเชิงบริหาร
+    `;
+  } else if(level==='model'){
+    maintainText = `
+      • รักษา <b>${esc(focusName)}</b> ซึ่งมียอดขายสุทธิ <b>${money(a.a)}</b> และ QTY <b>${num(a.q)}</b><br>
+      • รักษา Shop ที่เป็นแหล่งยอดขายหลัก และถ่ายทอด Best Practice ไปยัง Shop ที่ยังมีศักยภาพ<br>
+      • ควบคุม ASP <b>${num(a.q?a.a/a.q:0)}</b> เพื่อรักษามูลค่ายอดขายต่อหน่วย
+    `;
+    growText = `
+      • ขยายการขาย <b>${esc(focusName)}</b> ไปยัง Shop ที่ยังมี Contribution ต่ำแต่มีศักยภาพ<br>
+      • ให้ความสำคัญกับ Shop ที่มี Δ MOM เป็นบวก และใช้เป็นต้นแบบด้าน Sales Execution<br>
+      • เพิ่ม Conversion / Cross-sell / Product Availability ตามสาเหตุที่พบในแต่ละ Shop
+    `;
+    fixText = negShop ? `
+      • เร่งแก้ไขที่ <b>${esc(negShop.shop)}</b> ซึ่งเป็น Negative Shop Driver <b>${fmtDelta(negShop.delta)}</b><br>
+      • ตรวจสอบ QTY, Stock Availability, Traffic/Conversion และรูปแบบการนำเสนอสินค้าในร้าน<br>
+      • กำหนด Action รายร้านและติดตาม Recovery เทียบ MOM
+    ` : `
+      • ตรวจสอบ Shop ที่มี Contribution ต่ำหรือมีแนวโน้มลดลง แม้ Model โดยรวมยังเติบโต<br>
+      • แยกสาเหตุเป็น QTY, ASP และ Execution เพื่อกำหนด Action ให้ตรงจุด
+    `;
+    resourceText = `
+      • จัดสรร Stock และกำลังขายไปยัง Shop ที่มี Demand สูงสำหรับ <b>${esc(focusName)}</b><br>
+      • หาก QTY เป็นตัวขับเคลื่อนหลัก ให้เพิ่ม Availability และ Conversion; หาก ASP เป็นตัวขับเคลื่อนหลัก ให้เน้น Mix ของรุ่นมูลค่าสูง<br>
+      • จัดลำดับความสำคัญตาม Contribution ต่อ MOM เพื่อใช้ทรัพยากรอย่างมีประสิทธิภาพ
+    `;
+    monitorText = `
+      • ติดตาม <b>${esc(focusName)}</b> ในระดับ Shop แบบรายสัปดาห์<br>
+      • Monitor <b>Net Amount / QTY / ASP / MOM</b> และ Contribution ของแต่ละ Shop<br>
+      • ประเมินผล Action ในเดือนถัดไป และปรับกลยุทธ์ทันทีหาก Growth Driver เปลี่ยน
+    `;
+  } else if(level==='brand'){
+    maintainText = topBrandPos ? `
+      • รักษา <b>${esc(focusName)}</b> ซึ่งเป็น Brand ที่สร้างการเติบโตสูงสุด <b>${fmtDelta(topBrandPos.delta)}</b><br>
+      • ต่อยอด Model ที่เป็น Growth Driver และรักษา Shop ที่สร้าง Contribution สูง<br>
+      • ใช้ Mix ของ Model และ ASP เป็นตัวควบคุมคุณภาพของการเติบโต
+    ` : `
+      • รักษาฐานยอดขายของ <b>${esc(focusName)}</b> และติดตามการเปลี่ยนแปลงราย Model อย่างใกล้ชิด<br>
+      • ป้องกันการสูญเสียยอดขายจาก Model หรือ Shop ที่เริ่มชะลอตัว
+    `;
+    growText = `
+      • ขยาย Model ที่มี <b>Δ MOM เป็นบวก</b> และมีศักยภาพเพิ่ม Contribution ให้ <b>${esc(focusName)}</b><br>
+      • ขยายไปยัง Shop ที่มี Demand แต่ Contribution ยังต่ำ พร้อมนำ Best Practice จาก Shop Growth Driver ไปใช้<br>
+      • กำหนดเป้าหมายราย Model และราย Shop เพื่อให้สามารถวัดผลของ Action ได้ชัดเจน
+    `;
+    fixText = negDriver ? `
+      • เร่งแก้ไข <b>${esc(negDriver.model)}</b> ซึ่งเป็น Negative Model Driver <b>${fmtDelta(negDriver.delta)}</b><br>
+      • ตรวจสอบ QTY, ASP, Availability และ Sales Execution เพื่อแยกสาเหตุที่แท้จริง<br>
+      • จัดทำ Recovery Plan เฉพาะ Model และติดตามผลเป็นรายสัปดาห์
+    ` : `
+      • ตรวจสอบ Model ที่มีการชะลอตัวหรือ Contribution ต่ำภายใน <b>${esc(focusName)}</b><br>
+      • ป้องกันไม่ให้ Negative Driver ขยายตัวจนกระทบ Brand ในเดือนถัดไป
+    `;
+    resourceText = `
+      • จัดลำดับทรัพยากรไปยัง Model ที่มี Contribution ต่อ MOM สูงสุดภายใน <b>${esc(focusName)}</b><br>
+      • หาก <b>${esc(driverName)}</b> เป็นปัจจัยหลัก ให้จัดทรัพยากรให้ตรงกับสาเหตุ ไม่ใช้มาตรการเดียวกับทุก Model<br>
+      • กระจาย Best Practice จาก Shop ที่เติบโตไปยัง Shop ที่มีศักยภาพ
+    `;
+    monitorText = `
+      • ติดตาม Brand → Model → Shop เพื่อให้เห็นการเปลี่ยนแปลงของ Driver แบบครบลำดับชั้น<br>
+      • Monitor Net Amount, QTY, ASP และ Δ MOM ของ Growth / Negative Driver<br>
+      • ทบทวน Action ทุกเดือน และยกระดับประเด็นที่ Negative Driver ต่อเนื่อง
+    `;
+  } else {
+    maintainText = `
+      • รักษา Growth Driver หลัก <b>${posDriver?esc(posDriver.model):'—'}</b> ซึ่งสร้าง Contribution <b>${posDriver?fmtDelta(posDriver.delta):'—'}</b><br>
+      • รักษา Brand ที่มี Contribution เป็นบวก และขยาย Best Practice ไปยังพื้นที่ที่ยังมีช่องว่าง<br>
+      • ควบคุมทั้ง QTY และ ASP เพื่อให้การเติบโตมีคุณภาพและต่อเนื่อง
+    `;
+    growText = posShop ? `
+      • ขยายโอกาสใน <b>${esc(posShop.shop)}</b> ซึ่งสร้าง Contribution สูงสุด <b>${fmtDelta(posShop.delta)}</b><br>
+      • เจาะ Brand / Model ที่มี Demand สูงและเพิ่ม Conversion ใน Shop ศักยภาพ<br>
+      • ใช้ Growth Driver เป็นต้นแบบเพื่อยกระดับ Shop ที่มี Contribution ต่ำ
+    ` : `
+      • คัดเลือก Brand, Model และ Shop ที่มีศักยภาพเพื่อสร้างการเติบโตเพิ่มเติม<br>
+      • จัดลำดับโอกาสตาม Contribution ต่อ MOM และความสามารถในการขยายยอดขาย
+    `;
+    fixText = negDriver ? `
+      • เร่งแก้ไข <b>${esc(negDriver.model)}</b> ซึ่งหักล้างการเติบโต <b>${fmtDelta(negDriver.delta)}</b><br>
+      • ตรวจสอบต่อเนื่องลงไปถึง Brand → Model → Shop เพื่อระบุจุดที่ทำให้ยอดขายลดลง<br>
+      • กำหนด Recovery Plan ตามสาเหตุจริง ได้แก่ QTY / ASP / Availability / Sales Execution
+    ` : `
+      • ติดตาม Negative Driver ราย Brand / Model / Shop เพื่อป้องกันการกลับทิศของ Momentum
+    `;
+    resourceText = `
+      • ปัจจัยหลักของการเปลี่ยนแปลงคือ <b>${esc(driverName)}</b> ที่มีผลกระทบ <b>${driverValue}</b><br>
+      • จัดสรร Stock, กำลังขาย และกิจกรรมส่งเสริมการขายไปยังจุดที่สร้าง Contribution สูงสุด<br>
+      • ทบทวนทรัพยากรตาม Brand → Model → Shop เพื่อให้การลงทุนตรงจุด
+    `;
+    monitorText = `
+      • ติดตาม <b>Net Amount / QTY / ASP / MOM</b> ในทุกระดับของ Drill-down<br>
+      • ตรวจสอบ Growth Driver และ Negative Driver ทุกเดือน พร้อมระบุผู้รับผิดชอบ<br>
+      • ใช้ผลเดือนปัจจุบันเป็น Input สำหรับกำหนด Action และเป้าหมายเดือนถัดไป
+    `;
+  }
+
+  $('actionMaintain').innerHTML=maintainText;
+  $('actionGrow').innerHTML=growText;
+  $('actionFix').innerHTML=fixText;
+  $('actionResource').innerHTML=resourceText;
+  $('actionMonitor').innerHTML=monitorText;
 
   $('insight').innerHTML = `
     <div class="insight-title">สรุปผลการดำเนินงานและปัจจัยขับเคลื่อน</div>
