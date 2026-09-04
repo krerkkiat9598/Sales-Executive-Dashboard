@@ -6,6 +6,17 @@ const pct = v => (v*100).toFixed(1)+"%";
 const num = v => nf.format(Math.round(v||0));
 const esc = s => String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 
+
+const PRODUCT_DEEP_LINKS = {
+  "DEVICE":"product_deep_dive.html",
+  "GIA":"product_deep_dive.html",
+  "POSTPAID":"postpay_deep_dive.html",
+  "TRUE ONLINE":"tol_deep_dive.html",
+  "PREPAID":"prepaid_deep_dive.html",
+  "TRUE VISION":"tvs_deep_dive.html"
+};
+const productLink = p => PRODUCT_DEEP_LINKS[String(p).trim()] || "bma1.html";
+
 const filters = {
   fYear: r=>r.YEAR, fMonth:r=>r.MONTH, fRegion:r=>r.AREA_GROUP, fArea:r=>r.AREA,
   fChannel:r=>r.CHANNEL, fProduct:r=>r.PRODUCT, fShop:r=>r.SHOP_NAME
@@ -113,7 +124,7 @@ function updateKPIs(rows){
   const scope=[];
   const names=[["fYear","Year"],["fMonth","Month"],["fRegion","Region"],["fArea","Area"],["fChannel","Channel"],["fProduct","Product"],["fShop","Shop"]];
   names.forEach(([id,l])=>{if($(id).value)scope.push(`${l}: ${$(id).value}`)});
-  $("subtitle").textContent=(scope.length?scope.join(" • "):"Company Overview")+" • Net Amount + Volume Performance";
+  $("subtitle").textContent=(scope.length?scope.join(" • "):"Company Overview")+" • Net Amount + QTY Performance";
   const volumeMsg=qa<1?`Volume is below target by ${num(Math.abs(x.q-x.tq))} (${pct(qa)} achievement).`:`Volume is at ${pct(qa)} of target.`;
   const amountMsg=aa>=1?`Net Amount achieved ${pct(aa)} of target, with ${money(x.a-x.ta)} above target.`:`Net Amount is ${pct(aa)} of target, with a gap of ${money(Math.abs(x.a-x.ta))}.`;
   const driver=qa<aa?`ASP is ${nf.format(asp)} per unit, indicating value per unit is supporting the Net Amount result.`:`Volume is the stronger driver of Net Amount performance.`;
@@ -143,24 +154,24 @@ function renderTrend(rows){
   $("trendChart").innerHTML=`<div class="bars">${d.map(x=>`<div class="chartcol"><div class="barwrap"><div class="bar actual" style="height:${x.a/max*100}%"></div><div class="bar target" style="height:${x.t/max*100}%"></div></div><div class="barlabel">${x.k}</div></div>`).join("")}</div><div class="legend">Actual ■ &nbsp; Target ■ ${selectedMonth?`• Selected month: ${selectedMonth}`:""}</div>`;
 
   const maxq=Math.max(...d.map(x=>x.q),...d.map(x=>x.tq),1);
-  $("volumeChart").innerHTML=`<div class="bars">${d.map(x=>`<div class="chartcol"><div class="barwrap"><div class="bar qty" style="height:${x.q/maxq*100}%"></div><div class="bar target" style="height:${x.tq/maxq*100}%"></div></div><div class="barlabel">${x.k}</div></div>`).join("")}</div><div class="legend">Actual Volume ■ &nbsp; Target Volume ■ ${selectedMonth?`• Selected month: ${selectedMonth}`:""}</div>`;
+  $("volumeChart").innerHTML=`<div class="bars">${d.map(x=>`<div class="chartcol"><div class="barwrap"><div class="bar qty" style="height:${x.q/maxq*100}%"></div><div class="bar target" style="height:${x.tq/maxq*100}%"></div></div><div class="barlabel">${x.k}</div></div>`).join("")}</div><div class="legend">Actual QTY ■ &nbsp; Target QTY ■ ${selectedMonth?`• Selected month: ${selectedMonth}`:""}</div>`;
 }
 
 function renderProduct(rows){
   const by={}; rows.forEach(r=>{const k=r.PRODUCT;(by[k]??={a:0,t:0,q:0,tq:0}).a+=+r.NET_AMOUNT||0;by[k].t+=+r.TARGET_BOTTOMUP_NET_AMOUNT||0;by[k].q+=+r.QTY||0;by[k].tq+=+r.TARGET_BOTTOMUP_QTY||0});
   const arr=Object.entries(by).map(([k,v])=>({k,...v,aa:v.t?v.a/v.t:0,qa:v.tq?v.q/v.tq:0,asp:v.q?v.a/v.q:0})).sort((a,b)=>b.a-a.a);
-  $("productTable").innerHTML=`<div class="tablewrap"><table class="data-table"><thead><tr><th>Product</th><th>Net Amount</th><th>Amt Ach.</th><th>Volume</th><th>Vol Ach.</th><th>ASP</th></tr></thead><tbody>${arr.map(x=>`<tr><td>${esc(x.k)}</td><td>${money(x.a)}</td><td class="${cls(x.aa)}">${pct(x.aa)}</td><td>${num(x.q)}</td><td class="${cls(x.qa)}">${pct(x.qa)}</td><td>${nf.format(x.asp)}</td></tr>`).join("")}</tbody></table></div>`;
+  $("productTable").innerHTML=`<div class="tablewrap"><table class="data-table"><thead><tr><th>Product</th><th>Net Amount</th><th>Amt Ach.</th><th>QTY</th><th>QTY Ach.</th><th>ASP</th></tr></thead><tbody>${arr.map(x=>`<tr><td><a href="${productLink(x.k)}" class="product-link">${esc(x.k)}</a></td><td>${money(x.a)}</td><td class="${cls(x.aa)}">${pct(x.aa)}</td><td>${num(x.q)}</td><td class="${cls(x.qa)}">${pct(x.qa)}</td><td>${nf.format(x.asp)}</td></tr>`).join("")}</tbody></table></div>`;
 }
 function renderArea(rows){
   const by={}; rows.forEach(r=>{const k=r.AREA;(by[k]??={a:0,t:0,q:0,tq:0}).a+=+r.NET_AMOUNT||0;by[k].t+=+r.TARGET_BOTTOMUP_NET_AMOUNT||0;by[k].q+=+r.QTY||0;by[k].tq+=+r.TARGET_BOTTOMUP_QTY||0});
   const arr=Object.entries(by).map(([k,v])=>({k,...v,aa:v.t?v.a/v.t:0,qa:v.tq?v.q/v.tq:0})).sort((a,b)=>b.aa-a.aa);
-  $("areaTable").innerHTML=`<div class="tablewrap"><table class="data-table"><thead><tr><th>Area</th><th>Net Amount</th><th>Amt Ach.</th><th>Volume</th><th>Vol Ach.</th><th>Gap</th></tr></thead><tbody>${arr.map(x=>`<tr><td>${esc(x.k)}</td><td>${money(x.a)}</td><td class="${cls(x.aa)}">${pct(x.aa)}</td><td>${num(x.q)}</td><td class="${cls(x.qa)}">${pct(x.qa)}</td><td>${(x.a-x.t>=0?"+":"")+money(x.a-x.t)}</td></tr>`).join("")}</tbody></table></div>`;
+  $("areaTable").innerHTML=`<div class="tablewrap"><table class="data-table"><thead><tr><th>Area</th><th>Net Amount</th><th>Amt Ach.</th><th>QTY</th><th>QTY Ach.</th><th>Gap</th></tr></thead><tbody>${arr.map(x=>`<tr><td>${esc(x.k)}</td><td>${money(x.a)}</td><td class="${cls(x.aa)}">${pct(x.aa)}</td><td>${num(x.q)}</td><td class="${cls(x.qa)}">${pct(x.qa)}</td><td>${(x.a-x.t>=0?"+":"")+money(x.a-x.t)}</td></tr>`).join("")}</tbody></table></div>`;
 }
 function renderShops(rows){
   const by={}; rows.forEach(r=>{const k=r.SHOP_NAME;(by[k]??={a:0,t:0,q:0,tq:0}).a+=+r.NET_AMOUNT||0;by[k].t+=+r.TARGET_BOTTOMUP_NET_AMOUNT||0;by[k].q+=+r.QTY||0;by[k].tq+=+r.TARGET_BOTTOMUP_QTY||0});
   const arr=Object.entries(by).map(([k,v])=>({k,...v,aa:v.t?v.a/v.t:0,qa:v.tq?v.q/v.tq:0,asp:v.q?v.a/v.q:0})).filter(x=>x.a||x.t).sort((a,b)=>(b.a-b.t)-(a.a-a.t));
   const show=[...arr.slice(0,10),...arr.slice(-10)].filter((x,i,a)=>a.findIndex(y=>y.k===x.k)===i);
-  $("shopTable").innerHTML=`<div class="tablewrap"><table class="data-table"><thead><tr><th>Shop</th><th>Net Amount</th><th>Amt Ach.</th><th>Gap</th><th>Volume</th><th>Vol Ach.</th><th>ASP</th></tr></thead><tbody>${show.map(x=>`<tr><td>${esc(x.k)}</td><td>${money(x.a)}</td><td class="${cls(x.aa)}">${pct(x.aa)}</td><td class="${x.a-x.t>=0?'good':'critical'}">${(x.a-x.t>=0?"+":"")+money(x.a-x.t)}</td><td>${num(x.q)}</td><td class="${cls(x.qa)}">${pct(x.qa)}</td><td>${nf.format(x.asp)}</td></tr>`).join("")}</tbody></table></div>`;
+  $("shopTable").innerHTML=`<div class="tablewrap"><table class="data-table"><thead><tr><th>Shop</th><th>Net Amount</th><th>Amt Ach.</th><th>Gap</th><th>QTY</th><th>QTY Ach.</th><th>ASP</th></tr></thead><tbody>${show.map(x=>`<tr><td>${esc(x.k)}</td><td>${money(x.a)}</td><td class="${cls(x.aa)}">${pct(x.aa)}</td><td class="${x.a-x.t>=0?'good':'critical'}">${(x.a-x.t>=0?"+":"")+money(x.a-x.t)}</td><td>${num(x.q)}</td><td class="${cls(x.qa)}">${pct(x.qa)}</td><td>${nf.format(x.asp)}</td></tr>`).join("")}</tbody></table></div>`;
 }
 function trendRows(){
   // Monthly trend should keep all current dimensions except Month,

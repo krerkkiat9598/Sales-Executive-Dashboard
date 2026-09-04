@@ -213,7 +213,7 @@
             <h2>Product Performance</h2>
 
             <span>
-              Net Amount + QTY
+              Net Amount + QTY • Click Product for Deep Dive
             </span>
 
           </div>
@@ -290,27 +290,44 @@
 
   <script src="data.js"></script>
   <script src="bma1.js"></script>
+
+
 <script>
-// Restore drilldown context sent from Company Overview.
 (function(){
-  const qs=new URLSearchParams(location.search);
-  const wanted={fYear:qs.get("year"),fMonth:qs.get("month"),fChannel:qs.get("channel"),fProduct:qs.get("product"),fShop:qs.get("shop")};
-  function apply(){
-    let changed=false;
-    Object.keys(wanted).forEach(id=>{
-      const v=wanted[id], el=document.getElementById(id);
-      if(v && el && [...el.options].some(o=>o.value===v)){el.value=v; changed=true;}
+  const links = {
+    "DEVICE":"product_deep_dive.html",
+    "GIA":"product_deep_dive.html",
+    "POSTPAID":"postpay_deep_dive.html",
+    "TRUE ONLINE":"tol_deep_dive.html",
+    "PREPAID":"prepaid_deep_dive.html",
+    "TRUE VISION":"tvs_deep_dive.html"
+  };
+  function decorate(){
+    const table = document.getElementById("productTable");
+    if(!table) return;
+    table.querySelectorAll("tbody tr").forEach(tr=>{
+      const cell = tr.querySelector("td");
+      if(!cell || cell.dataset.deepLinked==="1") return;
+      const name = cell.textContent.trim();
+      const href = links[name];
+      if(!href) return;
+      const a = document.createElement("a");
+      a.href = href;
+      a.textContent = name;
+      a.title = "Open Product Deep Dive";
+      a.style.color = "inherit";
+      a.style.textDecoration = "none";
+      a.style.fontWeight = "700";
+      cell.textContent = "";
+      cell.appendChild(a);
+      cell.dataset.deepLinked = "1";
     });
-    if(changed){
-      const last=document.getElementById("fShop")||document.getElementById("fProduct")||document.getElementById("fMonth");
-      if(last) last.dispatchEvent(new Event("change",{bubbles:true}));
-    }
   }
-  setTimeout(apply,250);
-  setTimeout(apply,700);
+  const target = document.getElementById("productTable");
+  if(target) new MutationObserver(decorate).observe(target,{childList:true,subtree:true});
+  setTimeout(decorate,300);
 })();
 </script>
-
 
 </body>
 </html>
