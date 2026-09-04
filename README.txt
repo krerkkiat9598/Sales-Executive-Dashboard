@@ -50,3 +50,5 @@ Graph V3:
 - Best Month / Lowest Month use month names.
 - Y-axis uses rounded executive-friendly scales with 5 grid levels.
 - No data, KPI, filter, or drilldown logic was changed.
+
+Graph V5: adjusted Y-axis scale label area so scale labels do not overlap chart bars/values.
