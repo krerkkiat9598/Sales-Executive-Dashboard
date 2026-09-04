@@ -70,3 +70,9 @@ a{color:#0878b3}.product-link{font-weight:800}
 
 /* Shop table: slightly denser so more rows are visible */
 #shopTableWrap td{padding-top:9px !important;padding-bottom:9px !important;}
+
+/* V7: enforce performance status colors over table cell defaults */
+.data-table tbody td.good{color:#138a68 !important;font-weight:850 !important;}
+.data-table tbody td.watch{color:#a16c00 !important;font-weight:850 !important;}
+.data-table tbody td.risk{color:#c14b35 !important;font-weight:850 !important;}
+.data-table tbody td.critical{color:#d94b4b !important;font-weight:900 !important;}
