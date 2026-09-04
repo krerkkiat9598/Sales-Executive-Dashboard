@@ -151,22 +151,10 @@ function renderProduct(rows){
   const arr=Object.entries(by).map(([k,v])=>({k,...v,aa:v.t?v.a/v.t:0,qa:v.tq?v.q/v.tq:0,asp:v.q?v.a/v.q:0})).sort((a,b)=>b.a-a.a);
   $("productTable").innerHTML=`<div class="tablewrap"><table class="data-table"><thead><tr><th>Product</th><th>Net Amount</th><th>Amt Ach.</th><th>Volume</th><th>Vol Ach.</th><th>ASP</th></tr></thead><tbody>${arr.map(x=>`<tr><td>${esc(x.k)}</td><td>${money(x.a)}</td><td class="${cls(x.aa)}">${pct(x.aa)}</td><td>${num(x.q)}</td><td class="${cls(x.qa)}">${pct(x.qa)}</td><td>${nf.format(x.asp)}</td></tr>`).join("")}</tbody></table></div>`;
 }
-function bma1Url(){
-  const p=new URLSearchParams();
-  [["year","fYear"],["month","fMonth"],["channel","fChannel"],["product","fProduct"],["shop","fShop"]].forEach(([q,id])=>{
-    const v=$(id).value; if(v) p.set(q,v);
-  });
-  return "bma1.html"+(p.toString()?"?"+p.toString():"");
-}
 function renderArea(rows){
   const by={}; rows.forEach(r=>{const k=r.AREA;(by[k]??={a:0,t:0,q:0,tq:0}).a+=+r.NET_AMOUNT||0;by[k].t+=+r.TARGET_BOTTOMUP_NET_AMOUNT||0;by[k].q+=+r.QTY||0;by[k].tq+=+r.TARGET_BOTTOMUP_QTY||0});
   const arr=Object.entries(by).map(([k,v])=>({k,...v,aa:v.t?v.a/v.t:0,qa:v.tq?v.q/v.tq:0})).sort((a,b)=>b.aa-a.aa);
-  $("areaTable").innerHTML=`<div class="tablewrap"><table class="data-table"><thead><tr><th>Area</th><th>Net Amount</th><th>Amt Ach.</th><th>Volume</th><th>Vol Ach.</th><th>Gap</th></tr></thead><tbody>${arr.map(x=>{
-    const drill=x.k==="BMA I (North West)"
-      ? `<a href="${bma1Url()}" class="drill-link" title="Open BMA I Focus Dashboard">${esc(x.k)} <span class="drill-arrow">↗</span></a>`
-      : esc(x.k);
-    return `<tr><td>${drill}</td><td>${money(x.a)}</td><td class="${cls(x.aa)}">${pct(x.aa)}</td><td>${num(x.q)}</td><td class="${cls(x.qa)}">${pct(x.qa)}</td><td>${(x.a-x.t>=0?"+":"")}${money(x.a-x.t)}</td></tr>`;
-  }).join("")}</tbody></table></div>`;
+  $("areaTable").innerHTML=`<div class="tablewrap"><table class="data-table"><thead><tr><th>Area</th><th>Net Amount</th><th>Amt Ach.</th><th>Volume</th><th>Vol Ach.</th><th>Gap</th></tr></thead><tbody>${arr.map(x=>`<tr><td>${esc(x.k)}</td><td>${money(x.a)}</td><td class="${cls(x.aa)}">${pct(x.aa)}</td><td>${num(x.q)}</td><td class="${cls(x.qa)}">${pct(x.qa)}</td><td>${(x.a-x.t>=0?"+":"")+money(x.a-x.t)}</td></tr>`).join("")}</tbody></table></div>`;
 }
 function renderShops(rows){
   const by={}; rows.forEach(r=>{const k=r.SHOP_NAME;(by[k]??={a:0,t:0,q:0,tq:0}).a+=+r.NET_AMOUNT||0;by[k].t+=+r.TARGET_BOTTOMUP_NET_AMOUNT||0;by[k].q+=+r.QTY||0;by[k].tq+=+r.TARGET_BOTTOMUP_QTY||0});
