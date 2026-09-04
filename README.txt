@@ -19,3 +19,6 @@ IMPORTANT:
 VALIDATION:
 - Company Overview, 2026 / Month 8: 816.01 MB, Target 963.94 MB, QTY 64,992, Target QTY 107,401.
 - BMA I + POSTPAID, 2026 / Month 8: 0.22 MB, Target 0.27 MB, QTY 406, Target QTY 501, ASP 533.
+
+
+Update: Product dropdown is now treated as a master dimension. Selecting Channel/Area/Month no longer removes products from the Product dropdown. Transaction/KPI filtering still uses the selected Product, so products with no transactions in the selected scope show zero rather than disappearing.

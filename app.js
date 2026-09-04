@@ -79,13 +79,10 @@ function refreshDependent(){
   if(selected.fArea) rows = rows.filter(r=>String(r.AREA)===selected.fArea);
   setOptions("fChannel", rows.map(r=>r.CHANNEL), "All Channels");
 
-  rows = DATA;
-  if(selected.fYear) rows = rows.filter(r=>String(r.YEAR)===selected.fYear);
-  if(selected.fMonth) rows = rows.filter(r=>String(r.MONTH)===selected.fMonth);
-  if(selected.fRegion) rows = rows.filter(r=>String(r.AREA_GROUP)===selected.fRegion);
-  if(selected.fArea) rows = rows.filter(r=>String(r.AREA)===selected.fArea);
-  if(selected.fChannel) rows = rows.filter(r=>String(r.CHANNEL)===selected.fChannel);
-  setOptions("fProduct", rows.map(r=>r.PRODUCT), "All Products");
+  // Product is a master dimension: every Channel must expose the full Product list.
+  // Do NOT derive Product options from the currently filtered transaction rows;
+  // a missing transaction in a selected Area/Month/Channel must not hide a Product.
+  setOptions("fProduct", DATA.map(r=>r.PRODUCT), "All Products");
 
   rows = DATA;
   if(selected.fYear) rows = rows.filter(r=>String(r.YEAR)===selected.fYear);
