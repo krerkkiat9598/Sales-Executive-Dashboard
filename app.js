@@ -146,20 +146,40 @@ function renderTrend(rows){
   const selectedMonth = $("fMonth").value;
   const d = monthly(rows).sort((a,b)=>Number(a.k)-Number(b.k));
   const months = d;
-  const amountMax = Math.max(...months.flatMap(x=>[x.a,x.t]),1);
-  const qtyMax = Math.max(...months.flatMap(x=>[x.q,x.tq]),1);
+  const rawAmountMax = Math.max(...months.flatMap(x=>[x.a,x.t]),1);
+  const rawQtyMax = Math.max(...months.flatMap(x=>[x.q,x.tq]),1);
+  const niceScale = max => {
+    const rough = max/4;
+    const pow = Math.pow(10, Math.floor(Math.log10(rough)));
+    const n = rough/pow;
+    const step = (n<=1?1:n<=2?2:n<=5?5:10)*pow;
+    return {max:step*4, step};
+  };
+  const amountScale = niceScale(rawAmountMax);
+  const qtyScale = niceScale(rawQtyMax);
+  const amountMax = amountScale.max, qtyMax = qtyScale.max;
   const escNum = v => (v/1e6).toFixed(2);
   const selected = m => selectedMonth && String(Number(m))===String(Number(selectedMonth));
-  const mkGrid = max => `<div class="exec-grid"><span></span><span></span><span></span><span></span></div><div class="exec-scale"><span>${max>=1e9?(max/1e9).toFixed(1)+'B':max>=1e6?(max/1e6).toFixed(1):max>=1e3?Math.round(max/1e3)+'K':Math.round(max)}</span><span>${max>=1e6?(max/2e6).toFixed(1):max>=1e3?Math.round(max/2e3)+'K':Math.round(max/2)}</span><span>${max>=1e6?(max/4e6).toFixed(1):max>=1e3?Math.round(max/4e3)+'K':Math.round(max/4)}</span><span>0</span></div>`;
-  const amountBars = months.map(x=>`<div class="exec-col ${selected(x.k)?'selected':''}"><div class="exec-pair"><div class="exec-bar actual" style="height:${x.a/amountMax*100}%"><span class="exec-value">${escNum(x.a)}</span></div><div class="exec-bar target" style="height:${x.t/amountMax*100}%"><span class="exec-value">${escNum(x.t)}</span></div></div><div class="exec-month">${String(x.k).padStart(2,'0')}</div></div>`).join('');
-  const qtyBars = months.map(x=>`<div class="exec-col qty ${selected(x.k)?'selected':''}"><div class="exec-pair"><div class="exec-bar qty" style="height:${x.q/qtyMax*100}%"><span class="exec-value">${num(x.q)}</span></div><div class="exec-bar target" style="height:${x.tq/qtyMax*100}%"><span class="exec-value">${num(x.tq)}</span></div></div><div class="exec-month">${String(x.k).padStart(2,'0')}</div></div>`).join('');
+  const monthName = m => ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][Number(m)-1] || String(m).padStart(2,'0');
+  const scaleLabel = (v, unit) => {
+    if(unit==='MB') return v>=1e9 ? (v/1e9).toFixed(v%1e9?1:0)+'B' : (v/1e6).toFixed(v%1e6?1:0)+'M';
+    if(v>=1e6) return (v/1e6).toFixed(v%1e6?1:0)+'M';
+    if(v>=1e3) return Math.round(v/1e3)+'K';
+    return Math.round(v);
+  };
+  const mkGrid = (scale, unit) => {
+    const ticks = [4,3,2,1,0].map(i=>scale.max-(scale.step*i===scale.max?0:0));
+    return `<div class="exec-grid">${[0,1,2,3,4].map(()=>'<span></span>').join('')}</div><div class="exec-scale">${[4,3,2,1,0].map(i=>`<span>${scaleLabel(scale.step*i,unit)}</span>`).join('')}</div>`;
+  };
+  const amountBars = months.map(x=>`<div class="exec-col ${selected(x.k)?'selected':''}"><div class="exec-pair"><div class="exec-bar actual" style="height:${x.a/amountMax*100}%"><span class="exec-value">${escNum(x.a)}</span></div><div class="exec-bar target" style="height:${x.t/amountMax*100}%"><span class="exec-value">${escNum(x.t)}</span></div></div><div class="exec-month">${monthName(x.k)}</div></div>`).join('');
+  const qtyBars = months.map(x=>`<div class="exec-col qty ${selected(x.k)?'selected':''}"><div class="exec-pair"><div class="exec-bar qty" style="height:${x.q/qtyMax*100}%"><span class="exec-value">${num(x.q)}</span></div><div class="exec-bar target" style="height:${x.tq/qtyMax*100}%"><span class="exec-value">${num(x.tq)}</span></div></div><div class="exec-month">${monthName(x.k)}</div></div>`).join('');
   const ytdA=months.reduce((s,x)=>s+x.a,0), ytdT=months.reduce((s,x)=>s+x.t,0), ytdQ=months.reduce((s,x)=>s+x.q,0), ytdTQ=months.reduce((s,x)=>s+x.tq,0);
   const bestA=months.reduce((b,x)=>x.a>b.a?x:b,months[0]||{a:0,k:'-'}) , lowA=months.reduce((b,x)=>x.a<b.a?x:b,months[0]||{a:0,k:'-'}) ;
   const bestQ=months.reduce((b,x)=>x.q>b.q?x:b,months[0]||{q:0,k:'-'}) , lowQ=months.reduce((b,x)=>x.q<b.q?x:b,months[0]||{q:0,k:'-'}) ;
   const amountGapPct=ytdT?((ytdA/ytdT)-1)*100:0, qtyGapPct=ytdTQ?((ytdQ/ytdTQ)-1)*100:0;
-  const statHtml=(type)=>type==='amount'?`<div class="exec-stat"><div><div class="label">YTD (Jan – ${months.length?String(months[months.length-1].k).padStart(2,'0'):'-'})</div><div class="value">${money(ytdA)}</div></div><div><div class="sub">Target ${money(ytdT)}</div><div class="${amountGapPct<0?'neg':'pos'}">${amountGapPct>=0?'+':''}${amountGapPct.toFixed(1)}%</div></div></div><div class="exec-stat"><div><div class="label">Best Month</div><div class="value">${bestA.k==='-'?'-':String(bestA.k).padStart(2,'0')}</div></div><div><div class="sub">${money(bestA.a)}</div></div></div><div class="exec-stat"><div><div class="label">Lowest Month</div><div class="value">${lowA.k==='-'?'-':String(lowA.k).padStart(2,'0')}</div></div><div><div class="sub">${money(lowA.a)}</div></div></div>`:`<div class="exec-stat"><div><div class="label">YTD (Jan – ${months.length?String(months[months.length-1].k).padStart(2,'0'):'-'})</div><div class="value">${num(ytdQ)}</div></div><div><div class="sub">Target ${num(ytdTQ)}</div><div class="${qtyGapPct<0?'neg':'pos'}">${qtyGapPct>=0?'+':''}${qtyGapPct.toFixed(1)}%</div></div></div><div class="exec-stat"><div><div class="label">Best Month</div><div class="value">${bestQ.k==='-'?'-':String(bestQ.k).padStart(2,'0')}</div></div><div><div class="sub">${num(bestQ.q)}</div></div></div><div class="exec-stat"><div><div class="label">Lowest Month</div><div class="value">${lowQ.k==='-'?'-':String(lowQ.k).padStart(2,'0')}</div></div><div><div class="sub">${num(lowQ.q)}</div></div></div>`;
-  $("trendChart").innerHTML=`<div class="exec-chart-wrap"><div class="exec-chart">${mkGrid(amountMax)}<div class="exec-bars">${amountBars}</div></div><div class="exec-legend"><span><i class="dot actual"></i>Actual</span><span><i class="dot target"></i>Target</span><span><i class="dot selected"></i>Selected Month</span><span>Unit: MB</span></div><div class="exec-insight">${statHtml('amount')}</div></div>`;
-  $("volumeChart").innerHTML=`<div class="exec-chart-wrap"><div class="exec-chart">${mkGrid(qtyMax)}<div class="exec-bars">${qtyBars}</div></div><div class="exec-legend"><span><i class="dot qty"></i>Actual</span><span><i class="dot target"></i>Target</span><span><i class="dot selected"></i>Selected Month</span><span>Unit: Units</span></div><div class="exec-insight">${statHtml('qty')}</div></div>`;
+  const statHtml=(type)=>type==='amount'?`<div class="exec-stat"><div><div class="label">YTD (Jan – ${months.length?String(months[months.length-1].k).padStart(2,'0'):'-'})</div><div class="value">${money(ytdA)}</div></div><div><div class="sub">Target ${money(ytdT)}</div><div class="${amountGapPct<0?'neg':'pos'}">${amountGapPct>=0?'+':''}${amountGapPct.toFixed(1)}%</div></div></div><div class="exec-stat"><div><div class="label">Best Month</div><div class="value">${bestA.k==='-'?'-':monthName(bestA.k)}</div></div><div><div class="sub">${money(bestA.a)}</div></div></div><div class="exec-stat"><div><div class="label">Lowest Month</div><div class="value">${lowA.k==='-'?'-':monthName(lowA.k)}</div></div><div><div class="sub">${money(lowA.a)}</div></div></div>`:`<div class="exec-stat"><div><div class="label">YTD (Jan – ${months.length?String(months[months.length-1].k).padStart(2,'0'):'-'})</div><div class="value">${num(ytdQ)}</div></div><div><div class="sub">Target ${num(ytdTQ)}</div><div class="${qtyGapPct<0?'neg':'pos'}">${qtyGapPct>=0?'+':''}${qtyGapPct.toFixed(1)}%</div></div></div><div class="exec-stat"><div><div class="label">Best Month</div><div class="value">${bestQ.k==='-'?'-':monthName(bestQ.k)}</div></div><div><div class="sub">${num(bestQ.q)}</div></div></div><div class="exec-stat"><div><div class="label">Lowest Month</div><div class="value">${lowQ.k==='-'?'-':monthName(lowQ.k)}</div></div><div><div class="sub">${num(lowQ.q)}</div></div></div>`;
+  $("trendChart").innerHTML=`<div class="exec-chart-wrap"><div class="exec-chart">${mkGrid(amountScale,'MB')}<div class="exec-bars">${amountBars}</div></div><div class="exec-legend"><span><i class="dot actual"></i>Actual</span><span><i class="dot target"></i>Target</span><span><i class="dot selected"></i>Selected Month</span><span>Unit: MB</span></div><div class="exec-insight">${statHtml('amount')}</div></div>`;
+  $("volumeChart").innerHTML=`<div class="exec-chart-wrap"><div class="exec-chart">${mkGrid(qtyScale,'Units')}<div class="exec-bars">${qtyBars}</div></div><div class="exec-legend"><span><i class="dot qty"></i>Actual</span><span><i class="dot target"></i>Target</span><span><i class="dot selected"></i>Selected Month</span><span>Unit: Units</span></div><div class="exec-insight">${statHtml('qty')}</div></div>`;
 }
 
 function renderProduct(rows){
