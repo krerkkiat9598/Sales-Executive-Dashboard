@@ -1,7 +1,7 @@
 let DATA = [];
 
 async function loadExcelData(){
-  const res = await fetch("RawDATA09022026(2).xlsx", {cache:"no-store"});
+  const res = await fetch("RawDATA09022026.xlsx", {cache:"no-store"});
   if(!res.ok) throw new Error(`Cannot load Excel data (${res.status})`);
 
   const buffer = await res.arrayBuffer();
