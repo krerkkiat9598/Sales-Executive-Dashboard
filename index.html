@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sales Executive Dashboard</title>
 <link rel="stylesheet" href="style.css">
+<style>
+  .drill-link{color:inherit;text-decoration:none;font-weight:800;cursor:pointer}
+  .drill-link:hover{text-decoration:underline}
+  .drill-arrow{font-size:11px;opacity:.65;margin-left:3px}
+</style>
 </head>
 <body>
 <div class="app">
@@ -15,7 +20,7 @@
       <div id="subtitle">Company Overview • Net Amount + QTY Performance</div>
     </div>
     <div class="brand">SALES PERFORMANCE</div>
-    <a href="bma1.html" class="back-btn" style="text-decoration:none;">→ BMA I Focus</a>
+    <a id="bmaFocusLink" href="bma1.html" class="back-btn" style="text-decoration:none;">→ BMA I Focus</a>
   </header>
 
   <section class="filters">
@@ -75,7 +80,7 @@
 
     <section class="two-col">
       <div class="card">
-        <div class="card-head"><h2>Product Performance</h2><span>Net Amount + QTY</span></div>
+        <div class="card-head"><h2>Product Performance</h2><span>Net Amount + QTY</span>
         <div id="productTable"></div>
       </div>
       <div class="card">
@@ -101,7 +106,19 @@
     </section>
   </main>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="data.js"></script>
 <script src="app.js"></script>
+<script>
+(function(){
+  function sync(){
+    const link=document.getElementById("bmaFocusLink"); if(!link)return;
+    const p=new URLSearchParams();
+    [["year","fYear"],["month","fMonth"],["channel","fChannel"],["product","fProduct"],["shop","fShop"]].forEach(([q,id])=>{const e=document.getElementById(id);if(e&&e.value)p.set(q,e.value)});
+    link.href="bma1.html"+(p.toString()?"?"+p.toString():"");
+  }
+  ["fYear","fMonth","fRegion","fArea","fChannel","fProduct","fShop"].forEach(id=>{const e=document.getElementById(id);if(e)e.addEventListener("change",sync)});
+  setTimeout(sync,100);
+})();
+</script>
 </body>
 </html>
