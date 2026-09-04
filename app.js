@@ -17,6 +17,15 @@ const PRODUCT_DEEP_LINKS = {
 };
 const productLink = p => PRODUCT_DEEP_LINKS[String(p).trim()] || "bma1.html";
 
+// SAFE DRILLDOWN: navigation only; KPI/filter calculations remain unchanged.
+function bma1Url(){
+  const p=new URLSearchParams();
+  const map={fYear:"year",fMonth:"month",fChannel:"channel",fProduct:"product",fShop:"shop"};
+  Object.entries(map).forEach(([id,key])=>{ const v=$(id)?.value; if(v) p.set(key,v); });
+  return "bma1.html"+(p.toString()?"?"+p.toString():"");
+}
+function updateBma1Links(){ document.querySelectorAll("[data-bma1-link]").forEach(a=>a.href=bma1Url()); }
+
 const filters = {
   fYear: r=>r.YEAR, fMonth:r=>r.MONTH, fRegion:r=>r.AREA_GROUP, fArea:r=>r.AREA,
   fChannel:r=>r.CHANNEL, fProduct:r=>r.PRODUCT, fShop:r=>r.SHOP_NAME
@@ -165,7 +174,7 @@ function renderProduct(rows){
 function renderArea(rows){
   const by={}; rows.forEach(r=>{const k=r.AREA;(by[k]??={a:0,t:0,q:0,tq:0}).a+=+r.NET_AMOUNT||0;by[k].t+=+r.TARGET_BOTTOMUP_NET_AMOUNT||0;by[k].q+=+r.QTY||0;by[k].tq+=+r.TARGET_BOTTOMUP_QTY||0});
   const arr=Object.entries(by).map(([k,v])=>({k,...v,aa:v.t?v.a/v.t:0,qa:v.tq?v.q/v.tq:0})).sort((a,b)=>b.aa-a.aa);
-  $("areaTable").innerHTML=`<div class="tablewrap"><table class="data-table"><thead><tr><th>Area</th><th>Net Amount</th><th>Amt Ach.</th><th>QTY</th><th>QTY Ach.</th><th>Gap</th></tr></thead><tbody>${arr.map(x=>`<tr><td>${esc(x.k)}</td><td>${money(x.a)}</td><td class="${cls(x.aa)}">${pct(x.aa)}</td><td>${num(x.q)}</td><td class="${cls(x.qa)}">${pct(x.qa)}</td><td>${(x.a-x.t>=0?"+":"")+money(x.a-x.t)}</td></tr>`).join("")}</tbody></table></div>`;
+  $("areaTable").innerHTML=`<div class="tablewrap"><table class="data-table"><thead><tr><th>Area</th><th>Net Amount</th><th>Amt Ach.</th><th>QTY</th><th>QTY Ach.</th><th>Gap</th></tr></thead><tbody>${arr.map(x=>{const areaCell=x.k==="BMA I (North West)"?`<a href="${bma1Url()}" class="area-link" style="text-decoration:none;color:inherit;font-weight:600;">${esc(x.k)}</a>`:esc(x.k);return `<tr><td>${areaCell}</td><td>${money(x.a)}</td><td class="${cls(x.aa)}">${pct(x.aa)}</td><td>${num(x.q)}</td><td class="${cls(x.qa)}">${pct(x.qa)}</td><td>${(x.a-x.t>=0?"+":"")}${money(x.a-x.t)}</td></tr>`}).join("")}</tbody></table></div>`;
 }
 function renderShops(rows){
   const by={}; rows.forEach(r=>{const k=r.SHOP_NAME;(by[k]??={a:0,t:0,q:0,tq:0}).a+=+r.NET_AMOUNT||0;by[k].t+=+r.TARGET_BOTTOMUP_NET_AMOUNT||0;by[k].q+=+r.QTY||0;by[k].tq+=+r.TARGET_BOTTOMUP_QTY||0});
@@ -185,6 +194,7 @@ function trendRows(){
 }
 function render(){
   refreshDependent();
+  updateBma1Links();
   const rows=activeRows();
   updateKPIs(rows);
   renderTrend(trendRows());
