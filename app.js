@@ -1385,5 +1385,13 @@ init();
   });
 
   setTimeout(highlightSelectedMonth,100);
+  loadExcelData()
+  .then(() => {
+    populate();
+    render();
+  })
+  .catch(err => {
+    console.error("Excel Load Error:", err);
+  });
 
 })();
