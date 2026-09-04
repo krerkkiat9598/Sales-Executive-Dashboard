@@ -1,4 +1,29 @@
-const DATA = window.SALES_DATA || [];
+let DATA = [];
+
+async function loadExcelData(){
+  const res = await fetch("RawDATA09022026(2).xlsx", {cache:"no-store"});
+  if(!res.ok) throw new Error(`Cannot load Excel data (${res.status})`);
+
+  const buffer = await res.arrayBuffer();
+  const wb = XLSX.read(buffer, {type:"array"});
+  const ws = wb.Sheets[wb.SheetNames[0]];
+
+  const raw = XLSX.utils.sheet_to_json(ws, {defval:""});
+
+  DATA = raw.map(r => ({
+    YEAR: Number(r.YEAR),
+    MONTH: Number(r.MONTH),
+    AREA_GROUP: String(r.AREA_GROUP ?? ""),
+    AREA: String(r.AREA ?? ""),
+    CHANNEL: String(r.CHANNEL ?? ""),
+    PRODUCT: String(r.PRODUCT ?? ""),
+    SHOP_NAME: String(r.SHOP_NAME ?? ""),
+    TARGET_BOTTOMUP_QTY: Number(r.TARGET_BOTTOMUP_QTY) || 0,
+    TARGET_BOTTOMUP_NET_AMOUNT: Number(r.TARGET_BOTTOMUP_NET_AMOUNT) || 0,
+    QTY: Number(r.QTY) || 0,
+    NET_AMOUNT: Number(r.NET_AMOUNT) || 0
+  }));
+}
 const $ = id => document.getElementById(id);
 const nf = new Intl.NumberFormat("en-US",{maximumFractionDigits:0});
 const money = v => (v/1e6).toFixed(2)+" MB";
