@@ -149,10 +149,13 @@ function renderTrend(rows){
   const rawAmountMax = Math.max(...months.flatMap(x=>[x.a,x.t]),1);
   const rawQtyMax = Math.max(...months.flatMap(x=>[x.q,x.tq]),1);
   const niceScale = max => {
+    // Executive-friendly 4-step scale: keep the top grid close to the data peak.
     const rough = max/4;
     const pow = Math.pow(10, Math.floor(Math.log10(rough)));
     const n = rough/pow;
-    const step = (n<=1?1:n<=2?2:n<=5?5:10)*pow;
+    const candidates = [1,1.2,1.5,2,2.5,3,4,5,6,8,10];
+    const mult = candidates.find(x => x >= n) || 10;
+    const step = mult*pow;
     return {max:step*4, step};
   };
   const amountScale = niceScale(rawAmountMax);
@@ -168,7 +171,6 @@ function renderTrend(rows){
     return Math.round(v);
   };
   const mkGrid = (scale, unit) => {
-    const ticks = [4,3,2,1,0].map(i=>scale.max-(scale.step*i===scale.max?0:0));
     return `<div class="exec-grid">${[0,1,2,3,4].map(()=>'<span></span>').join('')}</div><div class="exec-scale">${[4,3,2,1,0].map(i=>`<span>${scaleLabel(scale.step*i,unit)}</span>`).join('')}</div>`;
   };
   const amountBars = months.map(x=>`<div class="exec-col ${selected(x.k)?'selected':''}"><div class="exec-pair"><div class="exec-bar actual" style="height:${x.a/amountMax*100}%"><span class="exec-value">${escNum(x.a)}</span></div><div class="exec-bar target" style="height:${x.t/amountMax*100}%"><span class="exec-value">${escNum(x.t)}</span></div></div><div class="exec-month">${monthName(x.k)}</div></div>`).join('');

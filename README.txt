@@ -43,3 +43,10 @@ IMPORTANT:
 - Do NOT restore the previous data.js or older Raw Data.
 - Do NOT modify style.css / bma1.css or product deep-dive pages for this data update.
 - Product dropdown remains a master dimension with all 6 Products.
+
+Graph V3:
+- Renamed chart titles to Monthly Net Amount Performance and Monthly QTY Performance.
+- Monthly labels use Jan-Dec.
+- Best Month / Lowest Month use month names.
+- Y-axis uses rounded executive-friendly scales with 5 grid levels.
+- No data, KPI, filter, or drilldown logic was changed.
