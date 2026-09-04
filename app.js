@@ -1278,21 +1278,48 @@ function render(){
   renderShops(rows);
 }
 
-Object.keys(filters).forEach(id=>
-  $(id).addEventListener("change",render)
-);
+async function init(){
 
-$("resetBtn").addEventListener("click",()=>{
-  Object.keys(filters).forEach(id=>$(id).value="");
+  try {
 
-  $("fYear").value="2026";
-  $("fMonth").value="8";
+    await loadExcelData();
 
-  render();
-});
+    Object.keys(filters).forEach(id=>{
+      $(id).addEventListener("change",render);
+    });
 
-populate();
-render();
+    $("resetBtn").addEventListener("click",()=>{
+      Object.keys(filters).forEach(id=>$(id).value="");
+      $("fYear").value="2026";
+      $("fMonth").value="8";
+      render();
+    });
+
+    populate();
+    render();
+
+  } catch(err) {
+
+    console.error(err);
+
+    document.querySelector("main").innerHTML = `
+      <div style="
+        padding:32px;
+        text-align:center;
+        color:#b91c1c;
+        background:#fff;
+        border-radius:16px;
+      ">
+        <h2>Unable to load sales data</h2>
+        <p>Please confirm that <b>RawDATA09022026.xlsx</b> is in the same GitHub folder as index.html.</p>
+        <p>${esc(err.message)}</p>
+      </div>
+    `;
+  }
+
+}
+
+init();
 
 /* ===== Highlight Selected Month ===== */
 (function(){
