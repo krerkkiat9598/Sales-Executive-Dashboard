@@ -1,24 +1,45 @@
-SAFE DRILLDOWN FIX — 04/09/2026
+RAW DATA 04092026 — DASHBOARD DATA UPDATE
 
-BASE VERSION:
-- Restored from the 02:00 working baseline files: index(1).html + app(1).js + clean bma1.html + data.js.
+SOURCE OF TRUTH:
+- Raw Excel: RawDATA09022026.xlsx (source file: RAW DATA 04092026.xlsx)
+- data.js was rebuilt directly from this Raw Excel.
 
-CHANGES IN THIS VERSION — ONLY DRILLDOWN:
-1. Company Overview header link -> BMA I Focus now carries Year / Month / Channel / Product / Shop context.
-2. Area table: only "BMA I (North West)" is clickable.
-3. Clicking BMA I passes the current Year / Month / Channel / Product / Shop filters to bma1.html.
-4. Added bma1.js to read the drilldown context and keep BMA I fixed as the Area.
-5. BMA I uses the same KPI aggregation rules and the same Actual-vs-Target bar chart style as Company Overview.
+DASHBOARD FILES:
+- index.html
+- app.js
+- bma1.html
+- bma1.js
+- data.js
+- RawDATA09022026.xlsx
+
+DATA CHECK:
+- Raw rows: 33,352
+- Years: 2025, 2026
+- Channels: 5
+- Products: 6
+- Every Channel has all 6 Products in the new Raw Data.
+
+NEW DATA VALIDATION — 2026 / Month 8 / Company Overview:
+- Net Amount: 783.08 MB
+- Target Net Amount: 914.82 MB
+- Achievement: 85.6%
+- QTY: 127,029
+- Target QTY: 189,582
+- QTY Achievement: 67.0%
+- ASP: 6,165
+
+DRILLDOWN VALIDATION — 2026 / Month 8 / True Shop Matching / POSTPAID:
+- Rows: 56
+- Net Amount: 12.39 MB
+- Target Net Amount: 16.21 MB
+- Achievement: 76.4%
+- QTY: 20,266
+- Target QTY: 24,339
+- QTY Achievement: 83.2%
+- ASP: 611
 
 IMPORTANT:
-- Do NOT replace or modify style.css / bma1.css in this fix.
-- Do NOT modify the existing product deep-dive pages.
-- Do NOT use the older Company_Overview_Drilldown_FIX.zip.
-- data.js in this package is the latest 04/09/2026 dashboard data file.
-
-VALIDATION:
-- Company Overview, 2026 / Month 8: 816.01 MB, Target 963.94 MB, QTY 64,992, Target QTY 107,401.
-- BMA I + POSTPAID, 2026 / Month 8: 0.22 MB, Target 0.27 MB, QTY 406, Target QTY 501, ASP 533.
-
-
-Update: Product dropdown is now treated as a master dimension. Selecting Channel/Area/Month no longer removes products from the Product dropdown. Transaction/KPI filtering still uses the selected Product, so products with no transactions in the selected scope show zero rather than disappearing.
+- This package uses the NEW Raw Data 04092026.
+- Do NOT restore the previous data.js or older Raw Data.
+- Do NOT modify style.css / bma1.css or product deep-dive pages for this data update.
+- Product dropdown remains a master dimension with all 6 Products.
