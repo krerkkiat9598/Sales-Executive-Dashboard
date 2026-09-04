@@ -8,3 +8,65 @@ main{display:flex;flex-direction:column;gap:12px}.hero-grid{display:grid;grid-te
 .tablewrap{width:100%;overflow:auto;max-height:390px}.data-table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px}.data-table thead th{padding:10px 12px;background:#f1f6fa;border-bottom:1px solid #d9e5ed;color:#557089;font-size:10px;font-weight:900;text-align:right;white-space:nowrap;position:sticky;top:0}.data-table thead th:first-child{text-align:left}.data-table tbody td{padding:9px 12px;border-bottom:1px solid #edf2f6;color:#2d4a63;text-align:right;white-space:nowrap}.data-table tbody td:first-child{text-align:left;font-weight:700;color:#244b6c}.data-table tbody tr:hover td{background:#f5fafd}.good{color:#21865f;font-weight:800}.watch{color:#a16c00;font-weight:800}.risk{color:#c14b35;font-weight:800}.critical{color:#d94b4b;font-weight:900}.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.action-card{padding:16px 18px;background:#fff;border:1px solid var(--border);border-radius:13px;box-shadow:var(--shadow)}.action-card:first-child{border-left:5px solid var(--blue)}.action-card:last-child{border-left:5px solid var(--teal)}#keyMessage,#actionMessage{color:#294a63;font-size:13px;line-height:1.6}
 a{color:#0878b3}.product-link{font-weight:800}
 @media(max-width:1200px){.hero-grid{grid-template-columns:repeat(3,1fr)}.filters{grid-template-columns:repeat(4,1fr)}}@media(max-width:900px){.app{padding:8px}.topbar{padding:17px}.topbar h1{font-size:23px}.two-col,.action-grid{grid-template-columns:1fr}.filters{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.hero-grid{grid-template-columns:1fr 1fr}.filters{grid-template-columns:1fr}.brand,.back-btn{display:none}.exec-insight{grid-template-columns:1fr}.insight{align-items:flex-start;flex-direction:column;gap:3px}.topbar{min-height:auto}}
+
+
+/* ===== V6 Executive Performance Tables ===== */
+.panel table thead th{
+  background:#f1f6fa !important;
+  color:#16466f !important;
+  font-weight:800 !important;
+  letter-spacing:.2px;
+  border-bottom:1px solid #cbddea !important;
+}
+.panel table tbody tr{
+  border-bottom:1px solid #e6eef4 !important;
+  transition:background .15s ease;
+}
+.panel table tbody tr:hover{
+  background:#f6fbfe !important;
+}
+.panel table td{
+  padding:10px 9px !important;
+  white-space:nowrap;
+}
+.panel table td:first-child,
+.panel table th:first-child{
+  font-weight:700;
+  text-align:left;
+}
+.panel table td:not(:first-child),
+.panel table th:not(:first-child){
+  text-align:right;
+}
+.panel .table-wrap{
+  border-radius:12px;
+  overflow:auto;
+}
+
+/* achievement / gap emphasis */
+.panel table td .good,
+.panel table td.good{color:#138a68 !important;font-weight:800;}
+.panel table td .warn,
+.panel table td.warn{color:#d58a16 !important;font-weight:800;}
+.panel table td .bad,
+.panel table td.bad{color:#d34a3a !important;font-weight:800;}
+
+/* make section headings more executive */
+.panel h2{
+  font-size:18px !important;
+  font-weight:850 !important;
+  color:#123f68 !important;
+}
+.panel .panel-note,
+.panel .subtle{
+  color:#68819a !important;
+}
+
+/* scrollbars */
+.panel .table-wrap::-webkit-scrollbar{width:8px;height:8px;}
+.panel .table-wrap::-webkit-scrollbar-track{background:#f3f7fa;border-radius:8px;}
+.panel .table-wrap::-webkit-scrollbar-thumb{background:#b7c9d8;border-radius:8px;}
+.panel .table-wrap::-webkit-scrollbar-thumb:hover{background:#8fa9bc;}
+
+/* Shop table: slightly denser so more rows are visible */
+#shopTableWrap td{padding-top:9px !important;padding-bottom:9px !important;}

@@ -52,3 +52,6 @@ Graph V3:
 - No data, KPI, filter, or drilldown logic was changed.
 
 Graph V5: adjusted Y-axis scale label area so scale labels do not overlap chart bars/values.
+
+
+V6 update: Executive styling improvements for Product, Area, and Shop performance tables only. Data, KPI, filters, and drilldown logic unchanged.
