@@ -50,7 +50,7 @@ function aggregate(rows){
   },{tq:0,ta:0,q:0,a:0});
 }
 function status(ach){return ach>=1?"ACHIEVE":ach>=.95?"WATCH":ach>=.8?"RISK":"CRITICAL"}
-function cls(ach){return ach>=1?"good":ach>=.95?"watch":ach>=.8?"risk":"critical"}
+function cls(ach){return ach>=1?"good":ach>=.9?"watch":"critical"}
 
 function refreshDependent(){
   // Preserve current selections, but rebuild only the dependent dropdowns.

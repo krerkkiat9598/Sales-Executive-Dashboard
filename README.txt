@@ -55,3 +55,5 @@ Graph V5: adjusted Y-axis scale label area so scale labels do not overlap chart 
 
 
 V6 update: Executive styling improvements for Product, Area, and Shop performance tables only. Data, KPI, filters, and drilldown logic unchanged.
+
+V8 update: standardized achievement color thresholds across Product, Area, and Shop tables. >=100% green, 90-99.9% amber, <90% red. Data and KPI calculations unchanged.
